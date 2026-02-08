@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDV Tanque Digital - Fechamento de Caixa</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body{padding:20px;background:#f5f7fa}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;padding-bottom:15px;border-bottom:2px solid #1a73e8}
+    .container{max-width:800px;margin:0 auto;background:#fff;border-radius:12px;padding:30px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+    .card-title{font-size:24px;font-weight:700;margin-bottom:20px;color:#dc3545;text-align:center}
+    .summary-box{background:#f8d7da;padding:20px;border-radius:8px;margin-bottom:20px;border-left:4px solid #dc3545}
+    .summary-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1b0b7}
+    .summary-row:last-child{border-bottom:none;font-weight:700;font-size:18px;color:#721c24}
+    .summary-label{color:#721c24}
+    .summary-value{color:#dc3545;font-weight:700}
+    .form-group{margin-bottom:20px}
+    .form-group label{display:block;margin-bottom:8px;font-weight:600;color:#333}
+    .form-group input{width:100%;padding:14px;border:2px solid #ddd;border-radius:8px;font-size:18px;text-align:right}
+    .btn{width:100%;padding:16px;background:#dc3545;color:#fff;border:none;border-radius:10px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px}
+    .btn:hover{background:#c82333}
+    .btn-secondary{background:#6c757d}
+    .btn-secondary:hover{background:#5a6268}
+    .alert{padding:15px;background:#fff3cd;border-radius:8px;margin-bottom:20px;border-left:4px solid #ffc107;text-align:center;font-weight:600;color:#856404}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <i class="fas fa-gas-pump"></i>
+      <span>PDV Tanque Digital</span>
+    </div>
+    <div class="operator" id="operatorName">Operador: Carregando...</div>
+  </div>
+  
+  <div class="container">
+    <div class="card-title">
+      <i class="fas fa-door-closed"></i> Fechamento de Caixa
+    </div>
+    
+    <div id="loading" style="text-align:center;padding:40px">
+      <i class="fas fa-spinner fa-spin" style="font-size:30px;color:#1a73e8"></i>
+      <p style="margin-top:15px">Carregando dados do caixa...</p>
+    </div>
+    
+    <div id="content" style="display:none">
+      <div class="alert">
+        <i class="fas fa-exclamation-triangle"></i> Antes de fechar o caixa, confira o valor em espécie!
+      </div>
+      
+      <div class="summary-box">
+        <div class="summary-row">
+          <span class="summary-label">Abertura</span>
+          <span class="summary-value" id="openingValue">R$ 0,00</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Vendas em Dinheiro</span>
+          <span class="summary-value" id="cashSales">R$ 0,00</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Vendas em PIX</span>
+          <span class="summary-value" id="pixSales">R$ 0,00</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Vendas em Cartão</span>
+          <span class="summary-value" id="cardSales">R$ 0,00</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Total de Vendas</span>
+          <span class="summary-value" id="totalSales">R$ 0,00</span>
+        </div>
+        <div class="summary-row" style="margin-top:15px">
+          <span class="summary-label">Total em Caixa</span>
+          <span class="summary-value" id="expectedValue">R$ 0,00</span>
+        </div>
+      </div>
+      
+      <form id="closeForm">
+        <div class="form-group">
+          <label>Valor Contado em Espécie (R$)</label>
+          <input type="number" id="countedValue" step="0.01" required>
+          <small style="color:#666;display:block;margin-top:5px">Conte todas as cédulas e moedas no caixa</small>
+        </div>
+        
+        <div class="form-group">
+          <label>Diferença</label>
+          <input type="text" id="difference" readonly style="background:#f8f9fa;color:#495057;font-weight:600">
+          <small style="color:#666;display:block;margin-top:5px">Valor positivo = sobra / Valor negativo = falta</small>
+        </div>
+        
+        <div class="form-group">
+          <label>Observações (opcional)</label>
+          <input type="text" id="observations" placeholder="Ex: Caixa fechado às 18:00">
+        </div>
+        
+        <button type="submit" class="btn">
+          <i class="fas fa-check-circle"></i> FECHAR CAIXA
+        </button>
+        
+        <button type="button" class="btn btn-secondary" style="margin-top:10px" onclick="window.location.href='dashboard.html'">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // 🔐 CONFIGURAÇÃO SEGURA - SUBSTITUA PELAS SUAS CHAVES
+    const SUPABASE_URL = 'https://qxgwpcpgkemxnjfyncfu.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Z3dwY3Bna2VteG5qZnluY2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzUyMzcsImV4cCI6MjA4NjE1MTIzN30.7a5RzenN6rHGyoaxewxs05rGEH9cXj7sxRtfxGVl0SI';
+    
+    const supabase = window.supabase.create({
+      supabaseUrl: SUPABASE_URL,
+      supabaseKey: SUPABASE_ANON_KEY
+    });
+
+    if (!localStorage.getItem('userId')) window.location.href = 'index.html';
+
+    let openingBalance = 0;
+    let totalCash = 0;
+    let totalPix = 0;
+    let totalCard = 0;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('operatorName').textContent = `Operador: ${localStorage.getItem('username') || 'Desconhecido'}`;
+      
+      // Verificar se tem caixa aberto
+      const {  cashRegister } = await supabase
+        .from('cash_registers')
+        .select('*')
+        .eq('company_id', localStorage.getItem('companyId'))
+        .eq('is_open', true)
+        .single();
+      
+      if (!cashRegister) {
+        alert('Nenhum caixa aberto para fechar!');
+        window.location.href = 'cash-open.html';
+        return;
+      }
+      
+      openingBalance = parseFloat(cashRegister.opening_balance);
+      document.getElementById('openingValue').textContent = openingBalance.toFixed(2).replace('.', ',');
+      
+      // Calcular vendas do dia
+      const today = new Date().toISOString().split('T')[0];
+      const {  sales } = await supabase
+        .from('sales')
+        .select('payment_cash, payment_pix, payment_card')
+        .eq('company_id', localStorage.getItem('companyId'))
+        .gte('created_at', today);
+      
+      if (sales) {
+        totalCash = sales.reduce((sum, s) => sum + parseFloat(s.payment_cash || 0), 0);
+        totalPix = sales.reduce((sum, s) => sum + parseFloat(s.payment_pix || 0), 0);
+        totalCard = sales.reduce((sum, s) => sum + parseFloat(s.payment_card || 0), 0);
+        
+        document.getElementById('cashSales').textContent = totalCash.toFixed(2).replace('.', ',');
+        document.getElementById('pixSales').textContent = totalPix.toFixed(2).replace('.', ',');
+        document.getElementById('cardSales').textContent = totalCard.toFixed(2).replace('.', ',');
+        
+        const totalSalesValue = totalCash + totalPix + totalCard;
+        document.getElementById('totalSales').textContent = totalSalesValue.toFixed(2).replace('.', ',');
+        
+        const expected = openingBalance + totalCash;
+        document.getElementById('expectedValue').textContent = expected.toFixed(2).replace('.', ',');
+      }
+      
+      // Preencher valor contado
+      document.getElementById('countedValue').value = (openingBalance + totalCash).toFixed(2);
+      
+      // Calcular diferença
+      document.getElementById('countedValue').addEventListener('input', calculateDifference);
+      calculateDifference();
+      
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+    });
+
+    function calculateDifference() {
+      const counted = parseFloat(document.getElementById('countedValue').value) || 0;
+      const expected = openingBalance + totalCash;
+      const diff = counted - expected;
+      
+      const diffEl = document.getElementById('difference');
+      diffEl.value = diff.toFixed(2).replace('.', ',');
+      
+      if (diff > 0) {
+        diffEl.style.color = '#28a745';
+        diffEl.style.background = '#d4edda';
+      } else if (diff < 0) {
+        diffEl.style.color = '#dc3545';
+        diffEl.style.background = '#f8d7da';
+      } else {
+        diffEl.style.color = '#495057';
+        diffEl.style.background = '#e9ecef';
+      }
+    }
+
+    document.getElementById('closeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const countedValue = parseFloat(document.getElementById('countedValue').value) || 0;
+      const observations = document.getElementById('observations').value;
+      
+      if (countedValue <= 0) {
+        alert('Informe um valor válido!');
+        return;
+      }
+      
+      const confirmed = confirm('Deseja realmente fechar o caixa?\nEsta ação não pode ser desfeita.');
+      if (!confirmed) return;
+      
+      try {
+        // Fechar caixa
+        const {  cashRegister } = await supabase
+          .from('cash_registers')
+          .select('id')
+          .eq('company_id', localStorage.getItem('companyId'))
+          .eq('is_open', true)
+          .single();
+        
+        await supabase
+          .from('cash_registers')
+          .update({
+            closing_balance: countedValue,
+            is_open: false,
+            closed_at: new Date().toISOString()
+          })
+          .eq('id', cashRegister.id);
+        
+        // Registrar movimentação de fechamento
+        await supabase.from('cash_movements').insert({
+          cash_register_id: cashRegister.id,
+          company_id: localStorage.getItem('companyId'),
+          movement_type: 'fechamento',
+          amount: countedValue,
+          description: observations || 'Fechamento de caixa',
+          authorized_by: localStorage.getItem('userId')
+        });
+        
+        alert(`✅ Caixa fechado com sucesso!\nValor final: R$ ${countedValue.toFixed(2)}`);
+        window.location.href = 'dashboard.html';
+        
+      } catch (error) {
+        console.error(error);
+        alert('Erro ao fechar caixa. Tente novamente.');
+      }
+    });
+  </script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>

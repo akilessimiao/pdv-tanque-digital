@@ -1,0 +1,14 @@
+pdv-tanque-digital/
+├── index.html                    ✅ Login + Ativação
+├── dashboard.html                ✅ Dashboard principal
+├── sales.html                    ✅ PDV com WhatsApp
+├── cash-open.html                ✅ Abertura de caixa
+├── cash-close.html               ✅ Fechamento de caixa
+├── SUPABASE_SETUP.sql            ✅ Script SQL
+├── vercel.json                   ✅ Config Vercel
+├── .gitignore                    ✅ Git ignore
+├── README.md                     ✅ Documentação
+├── INSTRUÇÕES_CLIENTE.md         ✅ Manual do usuário
+└── css/
+    ├── style.css                 ✅ Estilos gerais
+    └── dashboard.css             ✅ Estilos dashboard

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDV Tanque Digital - Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <i class="fas fa-gas-pump"></i>
+      <div>PDV Tanque Digital</div>
+    </div>
+    <div class="subtitle">Sistema de Vendas para seu Negócio</div>
+    
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('login')">Login</div>
+      <div class="tab" onclick="showTab('activate')">Ativar</div>
+    </div>
+    
+    <div id="loginTab">
+      <div class="input-group">
+        <label>Usuário</label>
+        <input type="text" id="user" placeholder="admin" autofocus>
+      </div>
+      <div class="input-group">
+        <label>Senha</label>
+        <input type="password" id="pass" placeholder="admin123">
+      </div>
+      <button class="btn" onclick="login()">ENTRAR</button>
+    </div>
+    
+    <div id="activateTab" style="display:none">
+      <div class="input-group">
+        <label>Código de Ativação</label>
+        <input type="text" id="serial" placeholder="TQD-XXXX-XXXX" maxlength="14">
+      </div>
+      <button class="btn" onclick="activate()">ATIVAR LICENÇA</button>
+      <button class="btn btn-secondary" style="margin-top:10px" onclick="showTab('login')">Já tenho conta</button>
+    </div>
+    
+    <div class="footer">
+      <p>Versão 3.1 • Tanque Digital © 2024</p>
+      <p class="highlight">Suporte Local: Natal/RN - Resposta em minutos!</p>
+    </div>
+  </div>
+
+  <script>
+    // 🔐 CONFIGURAÇÃO SEGURA - SUBSTITUA PELAS SUAS CHAVES
+    const SUPABASE_URL = 'https://qxgwpcpgkemxnjfyncfu.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Z3dwY3Bna2VteG5qZnluY2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzUyMzcsImV4cCI6MjA4NjE1MTIzN30.7a5RzenN6rHGyoaxewxs05rGEH9cXj7sxRtfxGVl0SI';
+    
+    const supabase = window.supabase.create({
+      supabaseUrl: SUPABASE_URL,
+      supabaseKey: SUPABASE_ANON_KEY
+    });
+
+    function showTab(tab) {
+      document.getElementById('loginTab').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('activateTab').style.display = tab === 'activate' ? 'block' : 'none';
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    async function login() {
+      const user = document.getElementById('user').value || 'admin';
+      const pass = document.getElementById('pass').value || 'admin123';
+      
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, company_id, username, role')
+        .eq('username', user)
+        .eq('password_hash', pass)
+        .eq('is_active', true)
+        .single();
+      
+      if (error || !data) {
+        alert('Usuário/senha inválidos! Tente: admin / admin123');
+        return;
+      }
+      
+      localStorage.setItem('userId', data.id);
+      localStorage.setItem('companyId', data.company_id);
+      localStorage.setItem('username', data.username);
+      localStorage.setItem('role', data.role);
+      window.location.href = 'dashboard.html';
+    }
+
+    async function activate() {
+      const serial = document.getElementById('serial').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (!serial) return alert('Digite o código de ativação!');
+      
+      const { data, error } = await supabase
+        .from('activation_keys')
+        .select('id')
+        .eq('serial_key', serial)
+        .eq('is_used', false)
+        .single();
+      
+      if (error || !data) return alert('Código inválido ou já usado!');
+      
+      const {  company } = await supabase
+        .from('companies')
+        .insert({ company_name: 'Minha Empresa' })
+        .select()
+        .single();
+      
+      await supabase.from('activation_keys').update({ is_used: true, client_id: company.id }).eq('id', data.id);
+      await supabase.from('users').insert({
+        company_id: company.id,
+        username: 'admin',
+        password_hash: 'admin123',
+        role: 'admin'
+      });
+      
+      alert('✅ Ativado! Use:\nUsuário: admin\nSenha: admin123');
+      showTab('login');
+    }
+  </script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>

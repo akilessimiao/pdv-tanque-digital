@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDV Tanque Digital - Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <i class="fas fa-gas-pump"></i>
+      <span>PDV Tanque Digital</span>
+    </div>
+    <div class="user">
+      <span id="userName">Carregando...</span>
+      <button class="logout" onclick="logout()">Sair</button>
+    </div>
+  </div>
+  
+  <div class="main">
+    <h1 class="welcome">Bem-vindo, <span id="userName2"></span>!</h1>
+    
+    <div class="stats">
+      <div class="card">
+        <div class="card-icon"><i class="fas fa-shopping-cart"></i></div>
+        <div class="card-label">Vendas Hoje</div>
+        <div class="card-value" id="salesCount">0</div>
+        <div class="card-label">R$ <span id="salesTotal">0,00</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon"><i class="fas fa-money-bill-wave"></i></div>
+        <div class="card-label">Caixa</div>
+        <div class="card-value" id="cashStatus">Fechado</div>
+        <div class="card-label">R$ <span id="cashBalance">0,00</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon"><i class="fas fa-box"></i></div>
+        <div class="card-label">Produtos</div>
+        <div class="card-value" id="productCount">0</div>
+        <div class="card-label"><span id="lowStock">0</span> em baixa</div>
+      </div>
+    </div>
+    
+    <div class="quick-actions">
+      <button class="action-btn" onclick="window.location='sales.html'">
+        <i class="fas fa-cash-register"></i>
+        Nova Venda (F2)
+      </button>
+      <button class="action-btn" onclick="alert('Funcionalidade completa disponível em 48h!')">
+        <i class="fas fa-box-open"></i>
+        Produtos
+      </button>
+      <button class="action-btn" onclick="openCash()">
+        <i class="fas fa-door-open"></i>
+        Caixa
+      </button>
+      <button class="action-btn" onclick="alert('Relatório diário gerado automaticamente no fechamento de caixa')">
+        <i class="fas fa-file-invoice"></i>
+        Relatórios
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // 🔐 CONFIGURAÇÃO SEGURA - SUBSTITUA PELAS SUAS CHAVES
+    const SUPABASE_URL = 'https://qxgwpcpgkemxnjfyncfu.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Z3dwY3Bna2VteG5qZnluY2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzUyMzcsImV4cCI6MjA4NjE1MTIzN30.7a5RzenN6rHGyoaxewxs05rGEH9cXj7sxRtfxGVl0SI';
+    
+    const supabase = window.supabase.create({
+      supabaseUrl: SUPABASE_URL,
+      supabaseKey: SUPABASE_ANON_KEY
+    });
+
+    if (!localStorage.getItem('userId')) window.location.href = 'index.html';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('userName').textContent = localStorage.getItem('username');
+      document.getElementById('userName2').textContent = localStorage.getItem('username');
+      
+      // Verificar caixa
+      const {  cash } = await supabase
+        .from('cash_registers')
+        .select('opening_balance')
+        .eq('company_id', localStorage.getItem('companyId'))
+        .eq('is_open', true)
+        .single();
+      
+      if (cash) {
+        document.getElementById('cashStatus').textContent = 'Aberto';
+        document.getElementById('cashStatus').style.color = '#28a745';
+        document.getElementById('cashBalance').textContent = parseFloat(cash.opening_balance).toFixed(2).replace('.', ',');
+      }
+      
+      // Contar vendas de hoje
+      const today = new Date().toISOString().split('T')[0];
+      const {  sales } = await supabase
+        .from('sales')
+        .select('total_amount')
+        .eq('company_id', localStorage.getItem('companyId'))
+        .gte('created_at', today);
+      
+      if (sales) {
+        document.getElementById('salesCount').textContent = sales.length;
+        const total = sales.reduce((sum, s) => sum + parseFloat(s.total_amount), 0);
+        document.getElementById('salesTotal').textContent = total.toFixed(2).replace('.', ',');
+      }
+      
+      // Contar produtos
+      const {  products } = await supabase
+        .from('products')
+        .select('stock')
+        .eq('company_id', localStorage.getItem('companyId'));
+      
+      if (products) {
+        document.getElementById('productCount').textContent = products.length;
+        const low = products.filter(p => p.stock < 5).length;
+        document.getElementById('lowStock').textContent = low;
+      }
+    });
+
+    function openCash() {
+      const isOpen = document.getElementById('cashStatus').textContent === 'Aberto';
+      if (isOpen) {
+        window.location.href = 'cash-close.html';
+      } else {
+        window.location.href = 'cash-open.html';
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'index.html';
+    }
+  </script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>

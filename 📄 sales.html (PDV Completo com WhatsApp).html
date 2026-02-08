@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDV Tanque Digital - Venda</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body{padding:20px;background:#f5f7fa}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid #1a73e8}
+    .container{display:grid;grid-template-columns:1fr 350px;gap:25px;max-width:1400px;margin:0 auto}
+    .products{background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+    .search{display:flex;gap:10px;margin-bottom:20px}
+    .search input{flex:1;padding:14px;border:2px solid #ddd;border-radius:8px;font-size:18px}
+    .search button{padding:0 25px;background:#1a73e8;color:#fff;border:none;border-radius:8px;font-size:18px;font-weight:600;cursor:pointer}
+    .cart{background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.08);display:flex;flex-direction:column}
+    .cart-title{font-size:20px;font-weight:700;margin-bottom:20px;color:#333;display:flex;justify-content:space-between}
+    .cart-items{flex:1;max-height:400px;overflow-y:auto;margin-bottom:20px}
+    .cart-item{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}
+    .item-name{font-weight:600}
+    .item-total{color:#1a73e8;font-weight:700}
+    .payment-methods{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+    .pay-btn{padding:15px;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px}
+    .pay-btn.cash{background:#28a745;color:#fff}
+    .pay-btn.pix{background:#00c853;color:#fff}
+    .pay-btn.card{background:#ffc107;color:#333}
+    .pay-btn.mixed{background:#6f42c1;color:#fff}
+    .pay-inputs{display:none;margin-bottom:20px}
+    .pay-inputs.active{display:block}
+    .pay-row{display:flex;gap:10px;margin-bottom:12px}
+    .pay-row input{flex:1;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:18px;text-align:right}
+    .pay-row label{font-weight:600;color:#555}
+    .total{font-size:28px;font-weight:700;text-align:center;margin:20px 0;color:#1a73e8}
+    .actions{display:flex;gap:15px}
+    .btn{flex:1;padding:18px;border:none;border-radius:10px;font-size:18px;font-weight:700;cursor:pointer}
+    .btn-cancel{background:#dc3545;color:#fff}
+    .btn-finalize{background:#1a73e8;color:#fff}
+    .customer{margin-bottom:20px;padding:15px;background:#e8f0fe;border-radius:10px}
+    .customer input{width:100%;padding:12px;margin-top:8px;border:2px solid #1a73e8;border-radius:8px;font-size:16px}
+    @media (max-width:900px){.container{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <i class="fas fa-gas-pump"></i>
+      <span>PDV Tanque Digital</span>
+    </div>
+    <div class="operator" id="operatorName">Operador: Carregando...</div>
+  </div>
+  
+  <div class="container">
+    <div class="products">
+      <div class="customer">
+        <div style="font-weight:600;margin-bottom:8px">Cliente (opcional)</div>
+        <input type="text" id="customerName" placeholder="Nome do cliente">
+        <input type="text" id="customerDoc" placeholder="CPF ou CNPJ" maxlength="18" style="margin-top:10px">
+      </div>
+      
+      <div class="search">
+        <input type="text" id="search" placeholder="Código ou nome do produto..." autofocus>
+        <button onclick="addProduct()"><i class="fas fa-plus"></i> Adicionar</button>
+      </div>
+      
+      <div class="cart-items" id="cartItems">
+        <div style="text-align:center;padding:40px;color:#999">
+          <i class="fas fa-shopping-cart" style="font-size:40px;margin-bottom:15px"></i>
+          <p>Nenhum produto adicionado</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="cart">
+      <div class="cart-title">
+        <span>Carrinho</span>
+        <span id="itemCount">0 itens</span>
+      </div>
+      
+      <div id="cartList"></div>
+      
+      <div class="total">Total: R$ <span id="total">0,00</span></div>
+      
+      <div class="payment-methods">
+        <button class="pay-btn cash" onclick="setPayment('cash')">
+          <i class="fas fa-money-bill"></i> Dinheiro
+        </button>
+        <button class="pay-btn pix" onclick="setPayment('pix')">
+          <i class="fab fa-pix"></i> PIX
+        </button>
+        <button class="pay-btn card" onclick="setPayment('card')">
+          <i class="fas fa-credit-card"></i> Cartão
+        </button>
+        <button class="pay-btn mixed" onclick="setPayment('mixed')">
+          <i class="fas fa-calculator"></i> Misto
+        </button>
+      </div>
+      
+      <div class="pay-inputs" id="mixedInputs">
+        <div class="pay-row">
+          <label>Dinheiro</label>
+          <input type="number" id="payCash" value="0.00" step="0.01" oninput="calculateChange()">
+        </div>
+        <div class="pay-row">
+          <label>PIX</label>
+          <input type="number" id="payPix" value="0.00" step="0.01" oninput="calculateChange()">
+        </div>
+        <div class="pay-row">
+          <label>Cartão</label>
+          <input type="number" id="payCard" value="0.00" step="0.01" oninput="calculateChange()">
+        </div>
+        <div class="pay-row" style="font-weight:700;color:#1a73e8">
+          <label>Troco</label>
+          <span id="change">R$ 0,00</span>
+        </div>
+      </div>
+      
+      <div class="actions">
+        <button class="btn btn-cancel" onclick="clearCart()"><i class="fas fa-times"></i> Cancelar</button>
+        <button class="btn btn-finalize" onclick="finalizeSale()"><i class="fas fa-check"></i> Finalizar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 🔐 CONFIGURAÇÃO SEGURA - SUBSTITUA PELAS SUAS CHAVES
+    const SUPABASE_URL = 'https://qxgwpcpgkemxnjfyncfu.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Z3dwY3Bna2VteG5qZnluY2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzUyMzcsImV4cCI6MjA4NjE1MTIzN30.7a5RzenN6rHGyoaxewxs05rGEH9cXj7sxRtfxGVl0SI';
+    
+    const supabase = window.supabase.create({
+      supabaseUrl: SUPABASE_URL,
+      supabaseKey: SUPABASE_ANON_KEY
+    });
+
+    let cart = [];
+    let paymentMethod = 'cash';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('operatorName').textContent = `Operador: ${localStorage.getItem('username') || 'Desconhecido'}`;
+      
+      document.getElementById('search').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addProduct();
+      });
+      
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'F2') finalizeSale();
+        if (e.key === 'Escape') clearCart();
+      });
+      
+      setPayment('cash');
+    });
+    
+    async function addProduct() {
+      const searchTerm = document.getElementById('search').value.trim();
+      if (!searchTerm) return;
+      
+      const { data } = await supabase
+        .from('products')
+        .select('*')
+        .eq('company_id', localStorage.getItem('companyId'))
+        .or(`code.eq.${searchTerm},name.ilike.%${searchTerm}%`)
+        .limit(1);
+      
+      if (!data || data.length === 0) {
+        alert('Produto não encontrado!');
+        return;
+      }
+      
+      const product = data[0];
+      const existing = cart.find(p => p.id === product.id);
+      
+      if (existing) {
+        existing.qty++;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          price: parseFloat(product.price),
+          qty: 1
+        });
+      }
+      
+      updateCart();
+      document.getElementById('search').value = '';
+    }
+    
+    function updateCart() {
+      document.getElementById('itemCount').textContent = `${cart.reduce((sum, p) => sum + p.qty, 0)} itens`;
+      
+      if (cart.length === 0) {
+        document.getElementById('cartList').innerHTML = '';
+        document.getElementById('total').textContent = '0,00';
+        return;
+      }
+      
+      let html = '';
+      cart.forEach((item, index) => {
+        html += `
+          <div class="cart-item">
+            <div>
+              <div class="item-name">${item.name}</div>
+              <div>${item.qty} x R$ ${item.price.toFixed(2).replace('.', ',')}</div>
+            </div>
+            <div class="item-total">R$ ${(item.price * item.qty).toFixed(2).replace('.', ',')}</div>
+          </div>
+        `;
+      });
+      
+      document.getElementById('cartList').innerHTML = html;
+      
+      const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      document.getElementById('total').textContent = total.toFixed(2).replace('.', ',');
+      
+      calculateChange();
+    }
+    
+    function setPayment(method) {
+      paymentMethod = method;
+      document.getElementById('mixedInputs').classList.toggle('active', method === 'mixed');
+      
+      const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      
+      if (method === 'cash') {
+        document.getElementById('payCash').value = total.toFixed(2);
+        document.getElementById('payPix').value = '0.00';
+        document.getElementById('payCard').value = '0.00';
+      } else if (method === 'pix') {
+        document.getElementById('payCash').value = '0.00';
+        document.getElementById('payPix').value = total.toFixed(2);
+        document.getElementById('payCard').value = '0.00';
+      } else if (method === 'card') {
+        document.getElementById('payCash').value = '0.00';
+        document.getElementById('payPix').value = '0.00';
+        document.getElementById('payCard').value = total.toFixed(2);
+      }
+      
+      calculateChange();
+    }
+    
+    function calculateChange() {
+      const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      const cash = parseFloat(document.getElementById('payCash').value) || 0;
+      const pix = parseFloat(document.getElementById('payPix').value) || 0;
+      const card = parseFloat(document.getElementById('payCard').value) || 0;
+      
+      const paid = cash + pix + card;
+      const change = paid - total;
+      
+      document.getElementById('change').textContent = `R$ ${Math.max(0, change).toFixed(2).replace('.', ',')}`;
+    }
+    
+    async function finalizeSale() {
+      if (cart.length === 0) return alert('Adicione produtos ao carrinho!');
+      
+      // Obter próximo número de série
+      const {  lastSale } = await supabase
+        .from('sales')
+        .select('receipt_serial')
+        .eq('company_id', localStorage.getItem('companyId'))
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      let serialNum = 1;
+      if (lastSale && lastSale.receipt_serial) {
+        serialNum = parseInt(lastSale.receipt_serial.split('-')[1]) + 1;
+      }
+      const receiptSerial = `111-${String(serialNum).padStart(6, '0')}`;
+      
+      const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      const cash = parseFloat(document.getElementById('payCash').value) || 0;
+      const pix = parseFloat(document.getElementById('payPix').value) || 0;
+      const card = parseFloat(document.getElementById('payCard').value) || 0;
+      const change = Math.max(0, (cash + pix + card) - total);
+      
+      // Salvar venda
+      const {  sale } = await supabase
+        .from('sales')
+        .insert({
+          company_id: localStorage.getItem('companyId'),
+          sale_number: Date.now(),
+          receipt_serial: receiptSerial,
+          total_amount: total,
+          payment_cash: cash,
+          payment_pix: pix,
+          payment_card: card,
+          change_amount: change,
+          customer_name: document.getElementById('customerName').value || null,
+          customer_document: document.getElementById('customerDoc').value || null,
+          operator_id: localStorage.getItem('userId')
+        })
+        .select()
+        .single();
+      
+      alert(`✅ Venda ${receiptSerial} concluída!\nTotal: R$ ${total.toFixed(2)}\nTroco: R$ ${change.toFixed(2)}`);
+      
+      // Enviar por WhatsApp se tiver CPF/CNPJ
+      const customerDoc = document.getElementById('customerDoc').value.trim();
+      if (customerDoc) {
+        const whatsappText = `
+*PDV TANQUE DIGITAL*
+*Cupom:* ${receiptSerial}
+*Cliente:* ${document.getElementById('customerName').value || 'Não informado'}
+*CPF/CNPJ:* ${customerDoc}
+
+*Itens:*
+${cart.map(item => `${item.name} (${item.qty}x) R$ ${(item.price * item.qty).toFixed(2)}`).join('\n')}
+
+*Total:* R$ ${total.toFixed(2)}
+*Troco:* R$ ${change.toFixed(2)}
+*Operador:* ${localStorage.getItem('username')}
+        `.trim();
+        
+        if (confirm('Enviar cupom para WhatsApp do cliente?')) {
+          const phone = prompt('Digite o WhatsApp do cliente (somente números com DDD):');
+          if (phone && phone.length >= 11) {
+            window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(whatsappText)}`, '_blank');
+          }
+        }
+      }
+      
+      clearCart();
+    }
+    
+    function clearCart() {
+      cart = [];
+      updateCart();
+      document.getElementById('customerName').value = '';
+      document.getElementById('customerDoc').value = '';
+    }
+  </script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>

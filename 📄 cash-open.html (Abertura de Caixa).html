@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDV Tanque Digital - Abertura de Caixa</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body{padding:20px;background:#f5f7fa}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;padding-bottom:15px;border-bottom:2px solid #1a73e8}
+    .container{max-width:600px;margin:0 auto;background:#fff;border-radius:12px;padding:30px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+    .card-title{font-size:24px;font-weight:700;margin-bottom:20px;color:#1a73e8;text-align:center}
+    .info-box{background:#e8f0fe;padding:15px;border-radius:8px;margin-bottom:20px;text-align:center}
+    .info-box strong{color:#1a73e8}
+    .form-group{margin-bottom:20px}
+    .form-group label{display:block;margin-bottom:8px;font-weight:600;color:#333}
+    .form-group input{width:100%;padding:14px;border:2px solid #ddd;border-radius:8px;font-size:18px;text-align:right}
+    .btn{width:100%;padding:16px;background:#1a73e8;color:#fff;border:none;border-radius:10px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px}
+    .btn:hover{background:#0d62d9}
+    .btn-danger{background:#dc3545}
+    .btn-danger:hover{background:#c82333}
+    .status{padding:15px;background:#fff3cd;border-radius:8px;margin-top:20px;text-align:center;font-weight:600;color:#856404}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <i class="fas fa-gas-pump"></i>
+      <span>PDV Tanque Digital</span>
+    </div>
+    <div class="operator" id="operatorName">Operador: Carregando...</div>
+  </div>
+  
+  <div class="container">
+    <div class="card-title">
+      <i class="fas fa-door-open"></i> Abertura de Caixa
+    </div>
+    
+    <div class="info-box">
+      <p><strong>Atenção:</strong> A abertura de caixa é obrigatória para realizar vendas.</p>
+      <p>O valor informado será o saldo inicial disponível para troco.</p>
+    </div>
+    
+    <div id="cashStatus"></div>
+    
+    <form id="openForm">
+      <div class="form-group">
+        <label>Valor Inicial para Troco (R$)</label>
+        <input type="number" id="initialValue" step="0.01" value="200.00" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Observações (opcional)</label>
+        <input type="text" id="observations" placeholder="Ex: Caixa iniciado às 08:00">
+      </div>
+      
+      <button type="submit" class="btn">
+        <i class="fas fa-check-circle"></i> ABRIR CAIXA
+      </button>
+      
+      <button type="button" class="btn btn-danger" style="margin-top:10px" onclick="window.location.href='dashboard.html'">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+    </form>
+  </div>
+
+  <script>
+    // 🔐 CONFIGURAÇÃO SEGURA - SUBSTITUA PELAS SUAS CHAVES
+    const SUPABASE_URL = 'https://qxgwpcpgkemxnjfyncfu.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Z3dwY3Bna2VteG5qZnluY2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzUyMzcsImV4cCI6MjA4NjE1MTIzN30.7a5RzenN6rHGyoaxewxs05rGEH9cXj7sxRtfxGVl0SI';
+    
+    const supabase = window.supabase.create({
+      supabaseUrl: SUPABASE_URL,
+      supabaseKey: SUPABASE_ANON_KEY
+    });
+
+    if (!localStorage.getItem('userId')) window.location.href = 'index.html';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('operatorName').textContent = `Operador: ${localStorage.getItem('username') || 'Desconhecido'}`;
+      
+      // Verificar se já tem caixa aberto
+      const { data: openCash } = await supabase
+        .from('cash_registers')
+        .select('*')
+        .eq('company_id', localStorage.getItem('companyId'))
+        .eq('is_open', true)
+        .single();
+      
+      if (openCash) {
+        document.getElementById('cashStatus').innerHTML = `
+          <div class="status" style="background:#d4edda;color:#155724;border:1px solid #c3e6cb">
+            <i class="fas fa-check-circle"></i> Caixa já está aberto desde ${new Date(openCash.opened_at).toLocaleTimeString('pt-BR')}
+          </div>
+        `;
+        document.getElementById('openForm').style.display = 'none';
+      }
+    });
+
+    document.getElementById('openForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const initialValue = parseFloat(document.getElementById('initialValue').value) || 0;
+      const observations = document.getElementById('observations').value;
+      
+      if (initialValue <= 0) {
+        alert('Informe um valor válido para o caixa!');
+        return;
+      }
+      
+      try {
+        await supabase.from('cash_registers').insert({
+          company_id: localStorage.getItem('companyId'),
+          user_id: localStorage.getItem('userId'),
+          opening_balance: initialValue,
+          initial_change: initialValue,
+          is_open: true,
+          opened_at: new Date().toISOString()
+        });
+        
+        alert(`✅ Caixa aberto com sucesso!\nValor inicial: R$ ${initialValue.toFixed(2)}`);
+        window.location.href = 'dashboard.html';
+        
+      } catch (error) {
+        console.error(error);
+        alert('Erro ao abrir caixa. Tente novamente.');
+      }
+    });
+  </script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>
