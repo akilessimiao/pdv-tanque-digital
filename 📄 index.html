@@ -6,6 +6,34 @@
   <title>PDV Tanque Digital - Login</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Estilos adicionais para mensagens e loading */
+    .message {
+      padding: 12px;
+      margin: 15px 0;
+      border-radius: 8px;
+      font-weight: 500;
+      text-align: center;
+    }
+    .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .message.error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: #1a73e8;
+      font-weight: 500;
+    }
+    .loading::before {
+      content: "⏳ ";
+      font-size: 1.4em;
+      animation: spin 1.5s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -14,12 +42,15 @@
       <div>PDV Tanque Digital</div>
     </div>
     <div class="subtitle">Sistema de Vendas para seu Negócio</div>
-    
+   
     <div class="tabs">
       <div class="tab active" onclick="showTab('login')">Login</div>
       <div class="tab" onclick="showTab('activate')">Ativar</div>
     </div>
-    
+
+    <!-- Área de mensagens -->
+    <div id="messageArea"></div>
+
     <div id="loginTab">
       <div class="input-group">
         <label>Usuário</label>
@@ -30,25 +61,27 @@
         <input type="password" id="pass" placeholder="admin123">
       </div>
       <button class="btn" onclick="login()">ENTRAR</button>
+      <div class="loading" id="loginLoading">Processando login...</div>
     </div>
-    
+   
     <div id="activateTab" style="display:none">
       <div class="input-group">
         <label>Código de Ativação</label>
-        <input type="text" id="serial" placeholder="TQD-XXXX-XXXX" maxlength="14">
+        <input type="text" id="serial" placeholder="Ex: TQD-ABCDE-FGHIJ-KLMNO" maxlength="30">
       </div>
       <button class="btn" onclick="activate()">ATIVAR LICENÇA</button>
       <button class="btn btn-secondary" style="margin-top:10px" onclick="showTab('login')">Já tenho conta</button>
+      <div class="loading" id="activateLoading">Ativando sistema...</div>
     </div>
-    
+   
     <div class="footer">
-      <p>Versão 3.1 • Tanque Digital © 2024</p>
+      <p>Versão 3.1 • Tanque Digital © 2024-2026</p>
       <p class="highlight">Suporte Local: Natal/RN - Resposta em minutos!</p>
     </div>
   </div>
 
   <script>
-    // 🔐 CONFIGURAÇÃO SEGURA - SUBSTITUA PELAS SUAS CHAVES
+    // Configuração Supabase
     const SUPABASE_URL = 'https://qxgwpcpgkemxnjfyncfu.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Z3dwY3Bna2VteG5qZnluY2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzUyMzcsImV4cCI6MjA4NjE1MTIzN30.7a5RzenN6rHGyoaxewxs05rGEH9cXj7sxRtfxGVl0SI';
     
@@ -57,68 +90,157 @@
       supabaseKey: SUPABASE_ANON_KEY
     });
 
+    // Mostra/esconde tabs
     function showTab(tab) {
       document.getElementById('loginTab').style.display = tab === 'login' ? 'block' : 'none';
       document.getElementById('activateTab').style.display = tab === 'activate' ? 'block' : 'none';
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       event.target.classList.add('active');
+      clearMessage();
     }
 
-    async function login() {
-      const user = document.getElementById('user').value || 'admin';
-      const pass = document.getElementById('pass').value || 'admin123';
-      
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, company_id, username, role')
-        .eq('username', user)
-        .eq('password_hash', pass)
-        .eq('is_active', true)
-        .single();
-      
-      if (error || !data) {
-        alert('Usuário/senha inválidos! Tente: admin / admin123');
+    // Mostra mensagem na tela
+    function showMessage(text, type = 'success') {
+      clearMessage();
+      const area = document.getElementById('messageArea');
+      const div = document.createElement('div');
+      div.className = `message ${type}`;
+      div.textContent = text;
+      area.appendChild(div);
+    }
+
+    function clearMessage() {
+      document.getElementById('messageArea').innerHTML = '';
+    }
+
+    // Função de ativação
+    async function activate() {
+      const serialInput = document.getElementById('serial');
+      const serial = serialInput.value.trim().toUpperCase();
+      const loading = document.getElementById('activateLoading');
+
+      if (!serial) {
+        showMessage('Digite o código de ativação!', 'error');
         return;
       }
-      
-      localStorage.setItem('userId', data.id);
-      localStorage.setItem('companyId', data.company_id);
-      localStorage.setItem('username', data.username);
-      localStorage.setItem('role', data.role);
-      window.location.href = 'dashboard.html';
+
+      loading.style.display = 'block';
+      clearMessage();
+
+      try {
+        // Chama a função de ativação no banco
+        const { data: result, error: rpcError } = await supabase
+          .rpc('ativar_sistema', {
+            p_serial_key: serial,
+            p_company_id: null  // Será associado ao criar a empresa
+          });
+
+        if (rpcError) throw rpcError;
+
+        const ativacao = result[0];
+
+        if (!ativacao.sucesso) {
+          showMessage(ativacao.mensagem, 'error');
+          return;
+        }
+
+        // Cria a empresa
+        const { data: company, error: companyError } = await supabase
+          .from('companies')
+          .insert({
+            company_name: 'Minha Empresa - Ativada em ' + new Date().toLocaleDateString('pt-BR')
+          })
+          .select('id')
+          .single();
+
+        if (companyError) throw companyError;
+
+        // Atualiza a chave com o client_id
+        const { error: updateError } = await supabase
+          .from('activation_keys')
+          .update({
+            is_used: true,
+            client_id: company.id
+          })
+          .eq('serial_key', serial);
+
+        if (updateError) throw updateError;
+
+        // Cria usuário admin
+        const { error: userError } = await supabase
+          .from('users')
+          .insert({
+            company_id: company.id,
+            username: 'admin',
+            password_hash: 'admin123', // ← Atenção: planeje migrar para Supabase Auth
+            role: 'admin',
+            is_active: true
+          });
+
+        if (userError) throw userError;
+
+        showMessage(
+          '✅ Sistema ativado com sucesso!\n\n' +
+          'Usuário: admin\n' +
+          'Senha: admin123\n\n' +
+          'Agora faça login na aba ao lado.',
+          'success'
+        );
+
+        serialInput.value = '';
+        showTab('login');
+
+      } catch (err) {
+        console.error('Erro na ativação:', err);
+        showMessage('Erro ao ativar: ' + (err.message || 'Tente novamente'), 'error');
+      } finally {
+        loading.style.display = 'none';
+      }
     }
 
-    async function activate() {
-      const serial = document.getElementById('serial').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-      if (!serial) return alert('Digite o código de ativação!');
-      
-      const { data, error } = await supabase
-        .from('activation_keys')
-        .select('id')
-        .eq('serial_key', serial)
-        .eq('is_used', false)
-        .single();
-      
-      if (error || !data) return alert('Código inválido ou já usado!');
-      
-      const {  company } = await supabase
-        .from('companies')
-        .insert({ company_name: 'Minha Empresa' })
-        .select()
-        .single();
-      
-      await supabase.from('activation_keys').update({ is_used: true, client_id: company.id }).eq('id', data.id);
-      await supabase.from('users').insert({
-        company_id: company.id,
-        username: 'admin',
-        password_hash: 'admin123',
-        role: 'admin'
-      });
-      
-      alert('✅ Ativado! Use:\nUsuário: admin\nSenha: admin123');
-      showTab('login');
+    // Função de login
+    async function login() {
+      const user = document.getElementById('user').value.trim() || 'admin';
+      const pass = document.getElementById('pass').value.trim() || 'admin123';
+      const loading = document.getElementById('loginLoading');
+
+      loading.style.display = 'block';
+      clearMessage();
+
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('id, company_id, username, role')
+          .eq('username', user)
+          .eq('password_hash', pass)
+          .eq('is_active', true)
+          .single();
+
+        if (error || !data) {
+          showMessage('Usuário ou senha inválidos!', 'error');
+          return;
+        }
+
+        // Salva sessão
+        localStorage.setItem('userId', data.id);
+        localStorage.setItem('companyId', data.company_id);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('role', data.role);
+
+        showMessage('Login realizado! Redirecionando...', 'success');
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 800);
+
+      } catch (err) {
+        console.error('Erro no login:', err);
+        showMessage('Erro ao fazer login: ' + (err.message || 'Tente novamente'), 'error');
+      } finally {
+        loading.style.display = 'none';
+      }
     }
   </script>
+
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>
