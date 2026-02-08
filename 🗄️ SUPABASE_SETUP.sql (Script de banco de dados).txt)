@@ -1,76 +1,65 @@
--- Tabela de ativação
-CREATE TABLE IF NOT EXISTS activation_keys (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  serial_key TEXT UNIQUE NOT NULL,
-  is_used BOOLEAN DEFAULT false,
-  client_id UUID,
-  created_at TIMESTAMP DEFAULT NOW()
+create table if not exists activation_keys (
+  id uuid primary key default gen_random_uuid (),
+  serial_key text unique not null,
+  is_used boolean default false,
+  client_id uuid,
+  created_at timestamp default now()
 );
 
--- Tabela de empresas
-CREATE TABLE IF NOT EXISTS companies (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  company_name TEXT NOT NULL,
-  cnpj TEXT,
-  phone TEXT,
-  address TEXT,
-  logo_url TEXT,
-  created_at TIMESTAMP DEFAULT NOW()
+create table if not exists companies (
+  id uuid primary key default gen_random_uuid (),
+  company_name text not null,
+  cnpj text,
+  phone text,
+  address text,
+  logo_url text,
+  created_at timestamp default now()
 );
 
--- Tabela de usuários
-CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
-  username TEXT NOT NULL UNIQUE,
-  password_hash TEXT NOT NULL,
-  role TEXT CHECK (role IN ('admin', 'operator')) DEFAULT 'operator',
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP DEFAULT NOW()
+create table if not exists users (
+  id uuid primary key default gen_random_uuid (),
+  company_id uuid references companies (id) on delete cascade,
+  username text not null unique,
+  password_hash text not null,
+  role text check (role in ('admin', 'operator')) default 'operator',
+  is_active boolean default true,
+  created_at timestamp default now()
 );
 
--- Tabela de produtos (estrutura correta do PDV)
-CREATE TABLE IF NOT EXISTS products (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
-  code TEXT,
-  barcode TEXT,
-  name TEXT NOT NULL,
-  cost_price DECIMAL(10,2) DEFAULT 0,
-  price DECIMAL(10,2) NOT NULL,
-  stock INTEGER DEFAULT 0,
-  created_at TIMESTAMP DEFAULT NOW()
+create table if not exists products (
+  id uuid primary key default gen_random_uuid (),
+  company_id uuid references companies (id) on delete cascade,
+  code text,
+  barcode text,
+  name text not null,
+  cost_price numeric(10, 2) default 0,
+  price numeric(10, 2) not null,
+  stock int default 0,
+  created_at timestamp default now()
 );
 
--- Tabela de caixa
-CREATE TABLE IF NOT EXISTS cash_registers (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  opening_balance DECIMAL(10,2) DEFAULT 0,
-  is_open BOOLEAN DEFAULT true,
-  opened_at TIMESTAMP DEFAULT NOW(),
-  closed_at TIMESTAMP
+create table if not exists cash_registers (
+  id uuid primary key default gen_random_uuid (),
+  company_id uuid references companies (id) on delete cascade,
+  user_id uuid references users (id) on delete set null,
+  opening_balance numeric(10, 2) default 0,
+  is_open boolean default true,
+  opened_at timestamp default now(),
+  closed_at timestamp
 );
 
--- Tabela de vendas
-CREATE TABLE IF NOT EXISTS sales (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
-  sale_number INTEGER NOT NULL,
-  receipt_serial TEXT DEFAULT '111-000001',
-  total_amount DECIMAL(10,2) NOT NULL,
-  payment_cash DECIMAL(10,2) DEFAULT 0,
-  payment_pix DECIMAL(10,2) DEFAULT 0,
-  payment_card DECIMAL(10,2) DEFAULT 0,
-  change_amount DECIMAL(10,2) DEFAULT 0,
-  customer_name TEXT,
-  customer_document TEXT,
-  operator_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  created_at TIMESTAMP DEFAULT NOW()
+create table if not exists sales (
+  id uuid primary key default gen_random_uuid (),
+  company_id uuid references companies (id) on delete cascade,
+  sale_number int not null,
+  receipt_serial text default '111-000001',
+  total_amount numeric(10, 2) not null,
+  payment_cash numeric(10, 2) default 0,
+  payment_pix numeric(10, 2) default 0,
+  payment_card numeric(10, 2) default 0,
+  change_amount numeric(10, 2) default 0,
+  customer_name text,
+  customer_document text,
+  operator_id uuid references users (id) on delete set null,
+  created_at timestamp default now()
 );
-
--- Serial de ativação (ÚNICO DADO INICIAL)
-INSERT INTO activation_keys (serial_key, is_used) 
-VALUES ('TQD-DEMO-2024', false)
-ON CONFLICT (serial_key) DO NOTHING;
