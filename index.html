@@ -7,526 +7,75 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .container {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      width: 100%;
-      max-width: 450px;
-      padding: 40px;
-      text-align: center;
-      animation: fadeIn 0.5s ease-in;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .logo-section {
-      margin-bottom: 30px;
-    }
-
-    .logo-icon {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, #1a73e8 0%, #0d62d9 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 15px;
-      color: white;
-      font-size: 36px;
-      box-shadow: 0 8px 20px rgba(26, 115, 232, 0.4);
-    }
-
-    .logo-icon i {
-      font-size: 32px;
-    }
-
-    h1 {
-      font-size: 28px;
-      color: #1a73e8;
-      margin-bottom: 8px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    .logo-subtitle {
-      color: #666;
-      font-size: 15px;
-      margin-top: 5px;
-    }
-
-    .login-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
-      background: #f8f9fa;
-      padding: 5px;
-      border-radius: 12px;
-      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      background: transparent;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 600;
-      color: #666;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .tab-btn:hover {
-      background: rgba(26, 115, 232, 0.1);
-      color: #1a73e8;
-    }
-
-    .tab-btn.active {
-      background: linear-gradient(135deg, #1a73e8 0%, #0d62d9 100%);
-      color: white;
-      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
-    }
-
-    .tab-btn.active i {
-      color: white;
-    }
-
-    .tab-content {
-      display: none;
-      animation: slideIn 0.3s ease;
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateX(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #333;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .form-group label i {
-      color: #1a73e8;
-      font-size: 16px;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 14px 16px;
-      border: 2px solid #e0e0e0;
-      border-radius: 12px;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      background: #fff;
-    }
-
-    .form-group input:focus {
-      outline: none;
-      border-color: #1a73e8;
-      box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
-    }
-
-    .form-options {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 25px;
-      font-size: 14px;
-    }
-
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #666;
-      cursor: pointer;
-    }
-
-    .checkbox-label input {
-      width: auto;
-      margin: 0;
-    }
-
-    .forgot-password {
-      color: #1a73e8;
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s;
-    }
-
-    .forgot-password:hover {
-      color: #0d62d9;
-      text-decoration: underline;
-    }
-
-    .btn-login {
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, #1a73e8 0%, #0d62d9 100%);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(26, 115, 232, 0.4);
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .btn-login:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(26, 115, 232, 0.5);
-    }
-
-    .btn-login:active {
-      transform: translateY(0);
-    }
-
-    .btn-activate {
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .btn-activate:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5);
-    }
-
-    .activation-info {
-      background: #e8f5e9;
-      border-left: 4px solid #4caf50;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      text-align: left;
-      font-size: 14px;
-      color: #2e7d32;
-    }
-
-    .activation-info i {
-      color: #4caf50;
-      margin-right: 8px;
-      font-size: 18px;
-    }
-
-    .activation-note {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 14px;
-      color: #666;
-    }
-
-    .activation-note a {
-      color: #1a73e8;
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s;
-    }
-
-    .activation-note a:hover {
-      color: #0d62d9;
-      text-decoration: underline;
-    }
-
-    .login-footer {
-      margin-top: 35px;
-      padding-top: 25px;
-      border-top: 1px solid #eee;
-    }
-
-    .login-footer p {
-      margin: 8px 0;
-      color: #666;
-      font-size: 14px;
-    }
-
-    .login-footer p i {
-      color: #1a73e8;
-      margin-right: 6px;
-    }
-
-    .version {
-      color: #999;
-      font-size: 13px;
-      margin-top: 5px;
-    }
-
-    /* Modal de Mensagem */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      text-align: center;
-      max-width: 400px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-      animation: modalSlide 0.3s ease;
-    }
-
-    @keyframes modalSlide {
-      from {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    .close {
-      position: absolute;
-      right: 20px;
-      top: 15px;
-      font-size: 28px;
-      font-weight: bold;
-      color: #999;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-
-    .close:hover {
-      color: #333;
-    }
-
-    .modal-content h2 {
-      margin: 15px 0;
-      color: #333;
-      font-size: 22px;
-    }
-
-    .modal-content p {
-      color: #666;
-      margin: 10px 0;
-      line-height: 1.6;
-    }
-
-    .btn-modal {
-      margin-top: 20px;
-      padding: 12px 30px;
-      background: #1a73e8;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .btn-modal:hover {
-      background: #0d62d9;
-      transform: translateY(-2px);
-    }
-
-    /* Responsividade */
-    @media (max-width: 480px) {
-      .container {
-        padding: 30px 20px;
-        max-width: 100%;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
-
-      .logo-icon {
-        width: 70px;
-        height: 70px;
-        font-size: 28px;
-      }
-
-      .btn-login,
-      .btn-activate {
-        padding: 14px;
-        font-size: 15px;
-      }
-    }
-
-    /* Input com ícone */
-    .serial-input {
-      font-size: 20px;
-      text-align: center;
-      letter-spacing: 5px;
-      font-weight: 600;
-      padding: 16px !important;
-    }
-
-    /* Loading */
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .loading {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(26, 115, 232, 0.3);
-      border-radius: 50%;
-      border-top-color: #1a73e8;
-      animation: spin 1s linear infinite;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+    .container { background: rgba(255, 255, 255, 0.95); border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; padding: 40px; text-align: center; animation: fadeIn 0.5s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .logo-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #1a73e8 0%, #0d62d9 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: white; font-size: 36px; box-shadow: 0 8px 20px rgba(26, 115, 232, 0.4); }
+    h1 { font-size: 28px; color: #1a73e8; margin-bottom: 8px; font-weight: 700; }
+    .logo-subtitle { color: #666; font-size: 15px; margin-top: 5px; }
+    .login-tabs { display: flex; gap: 10px; margin-bottom: 30px; background: #f8f9fa; padding: 5px; border-radius: 12px; box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05); }
+    .tab-btn { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; }
+    .tab-btn:hover { background: rgba(26, 115, 232, 0.1); color: #1a73e8; }
+    .tab-btn.active { background: linear-gradient(135deg, #1a73e8 0%, #0d62d9 100%); color: white; box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3); }
+    .form-group { margin-bottom: 20px; text-align: left; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px; }
+    .form-group input { width: 100%; padding: 14px 16px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; transition: all 0.3s ease; }
+    .form-group input:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1); }
+    .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .btn-login { background: linear-gradient(135deg, #1a73e8 0%, #0d62d9 100%); color: white; box-shadow: 0 4px 15px rgba(26, 115, 232, 0.4); }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26, 115, 232, 0.5); }
+    .btn-activate { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4); }
+    .btn-activate:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5); }
+    .activation-info { background: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; font-size: 14px; color: #2e7d32; }
+    .login-footer { margin-top: 35px; padding-top: 25px; border-top: 1px solid #eee; }
+    .login-footer p { margin: 8px 0; color: #666; font-size: 14px; }
+    .version { color: #999; font-size: 13px; margin-top: 5px; }
+    .debug { position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 5px 10px; font-size: 12px; border-radius: 5px; z-index: 1000; display: none; }
+    .success { background: #28a745; }
+    .error { background: #dc3545; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logo-section">
-      <div class="logo-icon">
-        <i class="fas fa-gas-pump"></i>
-      </div>
-      <h1>PDV Tanque Digital</h1>
-      <p class="logo-subtitle">Sistema Completo de Gestão de Vendas</p>
+    <div class="logo-icon">
+      <i class="fas fa-gas-pump"></i>
     </div>
-
+    <h1>PDV Tanque Digital</h1>
+    <p class="logo-subtitle">Sistema Completo de Gestão de Vendas</p>
+    
     <div class="login-tabs">
-      <button class="tab-btn active" onclick="switchTab('login')">
-        <i class="fas fa-sign-in-alt"></i> Login
-      </button>
-      <button class="tab-btn" onclick="switchTab('activate')">
-        <i class="fas fa-key"></i> Ativação
-      </button>
+      <button class="tab-btn active" id="loginTabBtn">Login</button>
+      <button class="tab-btn" id="activateTabBtn">Ativar</button>
     </div>
 
-    <!-- Formulário de Login -->
-    <form id="loginForm" class="tab-content active" onsubmit="event.preventDefault(); login();">
+    <div id="loginTab">
       <div class="form-group">
-        <label><i class="fas fa-user"></i> Usuário</label>
-        <input type="text" id="username" placeholder="Digite seu usuário" required autofocus>
+        <label>Usuário</label>
+        <input type="text" id="username" placeholder="admin" value="admin">
       </div>
-
       <div class="form-group">
-        <label><i class="fas fa-lock"></i> Senha</label>
-        <input type="password" id="password" placeholder="Digite sua senha" required>
+        <label>Senha</label>
+        <input type="password" id="password" placeholder="admin123" value="admin123">
       </div>
-
-      <div class="form-options">
-        <label class="checkbox-label">
-          <input type="checkbox" id="remember">
-          <span>Lembrar-me</span>
-        </label>
-        <a href="#" class="forgot-password">Esqueci minha senha</a>
-      </div>
-
-      <button type="submit" class="btn-login">
+      <button class="btn btn-login" id="loginBtn">
         <i class="fas fa-sign-in-alt"></i> ENTRAR
       </button>
-    </form>
-
-    <!-- Formulário de Ativação -->
-    <form id="activateForm" class="tab-content" onsubmit="event.preventDefault(); activate();">
+    </div>
+    
+    <div id="activateTab" style="display:none">
       <div class="activation-info">
-        <p><i class="fas fa-info-circle"></i> Digite o código de ativação fornecido pelo administrador</p>
+        <p><i class="fas fa-info-circle"></i> Digite o código de ativação: <strong>TQD-DEMO-2024</strong></p>
       </div>
-
       <div class="form-group">
-        <label><i class="fas fa-key"></i> Código de Ativação</label>
-        <input 
-          type="text" 
-          id="serialKey" 
-          class="serial-input"
-          placeholder="TQD-XXXX-XXXX" 
-          maxlength="14"
-          required
-        >
+        <label>Código de Ativação</label>
+        <input type="text" id="serialKey" placeholder="TQD-DEMO-2024" value="TQD-DEMO-2024" maxlength="14">
       </div>
-
-      <button type="submit" class="btn-activate">
-        <i class="fas fa-check-circle"></i> ATIVAR LICENÇA
+      <button class="btn btn-activate" id="activateBtn">
+        <i class="fas fa-key"></i> ATIVAR LICENÇA
       </button>
-
-      <div class="activation-note">
-        <p>Primeiros 10 clientes: <strong>R$ 49/mês</strong> (promoção de lançamento)</p>
-        <p><a href="#" onclick="switchTab('login'); return false;">← Já tenho conta</a></p>
-      </div>
-    </form>
-
+    </div>
+    
     <div class="login-footer">
       <p><i class="fas fa-shield-alt"></i> Sistema seguro e protegido</p>
       <p class="version">Versão 3.1 • Tanque Digital © 2024</p>
@@ -534,185 +83,154 @@
     </div>
   </div>
 
-  <!-- Modal de Mensagem -->
-  <div id="messageModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
-      <div id="modalIcon"></div>
-      <h2 id="modalTitle"></h2>
-      <p id="modalMessage"></p>
-      <button class="btn-modal" onclick="closeModal()">OK</button>
-    </div>
-  </div>
+  <div class="debug" id="debugMsg"></div>
 
   <script>
-    // 🔑 CONFIGURAÇÃO SUPABASE
+    // 🔑 CONFIGURAÇÃO SUPABASE (JÁ COM SUAS CHAVES)
     const SUPABASE_URL = 'https://qxgwpcpgkemxnjfyncfu.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Z3dwY3Bna2VteG5qZnluY2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzUyMzcsImV4cCI6MjA4NjE1MTIzN30.7a5RzenN6rHGyoaxewxs05rGEH9cXj7sxRtfxGVl0SI';
     const supabase = window.supabase.create({ supabaseUrl: SUPABASE_URL, supabaseKey: SUPABASE_ANON_KEY });
 
-    // Switch entre tabs
-    function switchTab(tab) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      
-      if (tab === 'login') {
-        document.querySelector('.tab-btn:first-child').classList.add('active');
-        document.getElementById('loginForm').classList.add('active');
-      } else {
-        document.querySelector('.tab-btn:last-child').classList.add('active');
-        document.getElementById('activateForm').classList.add('active');
-      }
-    }
-
-    // Formatar serial key automaticamente
-    document.getElementById('serialKey').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
-      if (value.length > 4) value = value.slice(0,4) + '-' + value.slice(4);
-      if (value.length > 9) value = value.slice(0,9) + '-' + value.slice(9);
-      e.target.value = value;
+    // Tabs
+    document.getElementById('loginTabBtn').addEventListener('click', () => {
+      document.getElementById('loginTab').style.display = 'block';
+      document.getElementById('activateTab').style.display = 'none';
+      document.getElementById('loginTabBtn').classList.add('active');
+      document.getElementById('activateTabBtn').classList.remove('active');
+    });
+    
+    document.getElementById('activateTabBtn').addEventListener('click', () => {
+      document.getElementById('loginTab').style.display = 'none';
+      document.getElementById('activateTab').style.display = 'block';
+      document.getElementById('loginTabBtn').classList.remove('active');
+      document.getElementById('activateTabBtn').classList.add('active');
     });
 
     // Login
-    async function login() {
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      showDebug('🔍 Verificando login...', 'info');
+      
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
-      const remember = document.getElementById('remember').checked;
-
+      
       if (!username || !password) {
-        showMessage('Atenção', 'Preencha todos os campos!', 'warning');
+        showDebug('❌ Preencha usuário e senha!', 'error');
         return;
       }
-
-      showMessage('Aguarde', 'Verificando credenciais...', 'info');
-
+      
       try {
         const { data, error } = await supabase
           .from('users')
           .select('id, company_id, username, role')
           .eq('username', username)
           .eq('password_hash', password)
-          .eq('is_active', true)
           .single();
-
+        
         if (error || !data) {
-          showMessage('Erro', 'Usuário ou senha inválidos!', 'error');
+          showDebug('❌ Usuário/senha inválidos!', 'error');
+          alert('Usuário ou senha inválidos!\nTente: admin / admin123');
           return;
         }
-
+        
         localStorage.setItem('userId', data.id);
         localStorage.setItem('companyId', data.company_id);
         localStorage.setItem('username', data.username);
         localStorage.setItem('role', data.role);
         
-        if (remember) {
-          localStorage.setItem('rememberMe', 'true');
-        }
-
-        showMessage('Sucesso', 'Login realizado com sucesso!', 'success', () => {
-          window.location.href = 'dashboard.html';
-        });
-
+        showDebug('✅ Login bem-sucedido!', 'success');
+        window.location.href = 'dashboard.html';
+        
       } catch (err) {
-        console.error(err);
-        showMessage('Erro', 'Erro ao conectar ao servidor!', 'error');
+        console.error('Erro no login:', err);
+        showDebug('❌ Erro de conexão. Verifique o console (F12).', 'error');
+        alert('Erro ao conectar. Abra o console (F12) e veja os erros.');
       }
-    }
+    });
 
     // Ativação
-    async function activate() {
+    document.getElementById('activateBtn').addEventListener('click', async () => {
+      showDebug('🔍 Verificando ativação...', 'info');
+      
       const serial = document.getElementById('serialKey').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
       
-      if (!serial || serial.length < 12) {
-        showMessage('Atenção', 'Digite um código de ativação válido!', 'warning');
+      if (serial !== 'TQD-DEMO-2024') {
+        showDebug('❌ Código inválido! Use: TQD-DEMO-2024', 'error');
+        alert('Código inválido!\nUse exatamente: TQD-DEMO-2024');
         return;
       }
-
-      showMessage('Aguarde', 'Verificando código de ativação...', 'info');
-
+      
       try {
-        const { data, error } = await supabase
-          .from('activation_keys')
-          .select('*')
-          .eq('serial_key', serial)
-          .eq('is_used', false)
+        // Verificar se já existe empresa
+        const {  company } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('company_name', 'Minha Empresa')
           .single();
-
-        if (error || !data) {
-          showMessage('Erro', 'Código de ativação inválido ou já utilizado!', 'error');
+        
+        if (company) {
+          // Empresa já existe - só criar usuário admin
+          await supabase.from('users').insert({
+            company_id: company.id,
+            username: 'admin',
+            password_hash: 'admin123',
+            role: 'admin'
+          });
+          
+          showDebug('✅ Sistema já ativado! Login: admin / admin123', 'success');
+          alert('✅ Sistema já ativado!\nUsuário: admin\nSenha: admin123');
+          document.getElementById('loginTabBtn').click();
           return;
         }
-
-        const {  company } = await supabase
+        
+        // Criar empresa nova
+        const {  newCompany } = await supabase
           .from('companies')
           .insert({ company_name: 'Minha Empresa' })
           .select()
           .single();
-
-        await supabase
-          .from('activation_keys')
-          .update({ is_used: true, client_id: company.id })
-          .eq('id', data.id);
-
+        
+        // Criar usuário admin
         await supabase.from('users').insert({
-          company_id: company.id,
+          company_id: newCompany.id,
           username: 'admin',
           password_hash: 'admin123',
           role: 'admin'
         });
-
-        showMessage('Sucesso', 'Licença ativada com sucesso! Redirecionando...', 'success', () => {
-          window.location.href = 'dashboard.html';
-        });
-
+        
+        showDebug('✅ Ativação concluída! Login: admin / admin123', 'success');
+        alert('✅ Ativação concluída!\nUsuário: admin\nSenha: admin123');
+        document.getElementById('loginTabBtn').click();
+        
       } catch (err) {
-        console.error(err);
-        showMessage('Erro', 'Erro ao ativar licença!', 'error');
+        console.error('Erro na ativação:', err);
+        showDebug('❌ Erro na ativação. Verifique o console (F12).', 'error');
+        alert('Erro na ativação. Abra o console (F12) e veja os erros.');
       }
+    });
+
+    // Debug helper
+    function showDebug(message, type) {
+      const debugEl = document.getElementById('debugMsg');
+      debugEl.textContent = message;
+      debugEl.style.display = 'block';
+      debugEl.className = `debug ${type}`;
+      
+      if (type !== 'info') {
+        setTimeout(() => {
+          debugEl.style.display = 'none';
+        }, 3000);
+      }
+      
+      console.log(`[${type.toUpperCase()}] ${message}`);
     }
 
-    // Modal de mensagem
-    function showMessage(title, message, type, callback) {
-      const modal = document.getElementById('messageModal');
-      const icon = document.getElementById('modalIcon');
-      const titleEl = document.getElementById('modalTitle');
-      const messageEl = document.getElementById('modalMessage');
-
-      titleEl.textContent = title;
-      messageEl.textContent = message;
-
-      const icons = {
-        success: '<i class="fas fa-check-circle" style="color: #28a745; font-size: 48px;"></i>',
-        error: '<i class="fas fa-times-circle" style="color: #dc3545; font-size: 48px;"></i>',
-        warning: '<i class="fas fa-exclamation-triangle" style="color: #ffc107; font-size: 48px;"></i>',
-        info: '<i class="fas fa-info-circle" style="color: #17a2b8; font-size: 48px;"></i>'
-      };
-
-      icon.innerHTML = icons[type] || icons.info;
-      modal.style.display = 'flex';
-
-      if (callback) {
-        setTimeout(callback, 1500);
-      }
-    }
-
-    function closeModal() {
-      document.getElementById('messageModal').style.display = 'none';
-    }
-
-    window.onclick = function(event) {
-      const modal = document.getElementById('messageModal');
-      if (event.target == modal) {
-        closeModal();
-      }
-    }
-
-    // Carregar dados salvos
-    window.addEventListener('DOMContentLoaded', () => {
-      if (localStorage.getItem('rememberMe') === 'true') {
-        document.getElementById('username').value = localStorage.getItem('username') || '';
-        document.getElementById('remember').checked = true;
-      }
+    // Tecla Enter no login
+    document.getElementById('password').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('loginBtn').click();
+    });
+    
+    document.getElementById('serialKey').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('activateBtn').click();
     });
   </script>
 </body>
