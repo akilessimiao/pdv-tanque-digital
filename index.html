@@ -79,18 +79,15 @@
       <p><strong style="color: #1a73e8;">📍 Suporte Local: Natal/RN - Resposta em minutos!</strong></p>
     </div>
   </div>
-
-  <script>
-    // 🔑 CONFIGURAÇÃO SUPABASE (JÁ COM SUAS CHAVES)
-    const SUPABASE_URL = 'https://qxgwpcpgkemxnjfyncfu.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Z3dwY3Bna2VteG5qZnluY2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzUyMzcsImV4cCI6MjA4NjE1MTIzN30.7a5RzenN6rHGyoaxewxs05rGEH9cXj7sxRtfxGVl0SI';
+    <script type="module">
+      import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
     
-    // Inicializar Supabase
-    const supabase = window.supabase.create({
-      supabaseUrl: SUPABASE_URL,
-      supabaseKey: SUPABASE_ANON_KEY
-    });
-
+      const SUPABASE_URL    = 'https://jhbwgcpci...';
+      const SUPABASE_ANON_KEY = 'eyJh...';
+    
+      window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      </script>
+    <script>
     // Funções de UI
     function showTab(tab) {
       document.getElementById('loginTab').style.display = tab === 'login' ? 'block' : 'none';
