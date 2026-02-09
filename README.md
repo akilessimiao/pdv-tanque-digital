@@ -3,24 +3,6 @@
 ```markdown
 # 🚀 PDV Tanque Digital
 
-<p align="center">
-  <img src="https://img.shields.io/badge/versão-3.1-blue?style=for-the-badge&logo=github" alt="Versão">
-  <img src="https://img.shields.io/badge/licença-MIT-green?style=for-the-badge&logo=github" alt="Licença">
-  <img src="https://img.shields.io/badge/suporte-Natal/RN-1a73e8?style=for-the-badge&logo=whatsapp" alt="Suporte Local">
-  <img src="https://img.shields.io/badge/deploy-Vercel-000000?style=for-the-badge&logo=vercel" alt="Vercel">
-  <img src="https://img.shields.io/badge/banco-Supabase-3ecf8e?style=for-the-badge&logo=supabase" alt="Supabase">
-</p>
-
-<p align="center">
-  <strong>Sistema Completo de Gestão de Vendas com Cupom por WhatsApp</strong><br>
-  <em>Feito em Natal/RN com ❤️ para comerciantes brasileiros</em>
-</p>
-
-<p align="center">
-  <img width="800" src="https://via.placeholder.com/800x400/1a73e8/ffffff?text=PDV+Tanque+Digital+-+Dashboard+Profissional" alt="Dashboard PDV Tanque Digital">
-</p>
-
----
 
 ## ✨ POR QUE ESCOLHER O PDV TANQUE DIGITAL?
 
@@ -232,16 +214,4 @@ Desenvolvido com ❤️ por **Akiles Simião** da **Tanque Digital** para fortal
 ![Status Online](https://img.shields.io/badge/status-online-brightgreen?style=for-the-badge&logo=github)
 ```
 
----
-
-## 🎨 RESULTADO ESPERADO
-
-Quando você atualizar seu `README.md` com este conteúdo:
-
-✅ **Visual profissional** com badges coloridos  
-✅ **Estrutura clara** com tabelas comparativas  
-✅ **Imagens placeholder** (substitua pelos prints reais depois)  
-✅ **Call-to-action forte** para conversão de clientes  
-✅ **Diferenciais competitivos** destacados  
-✅ **Informações de suporte** bem visíveis (seu maior trunfo!)  
 
