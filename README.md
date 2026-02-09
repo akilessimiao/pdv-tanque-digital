@@ -1,8 +1,23 @@
-# 📄 README.md PROFISSIONAL E MODERNO
-
-```markdown
 # 🚀 PDV Tanque Digital
 
+<p align="center">
+  <img src="https://img.shields.io/badge/versão-3.1-blue?style=for-the-badge&logo=github" alt="Versão">
+  <img src="https://img.shields.io/badge/licença-MIT-green?style=for-the-badge&logo=github" alt="Licença">
+  <img src="https://img.shields.io/badge/suporte-Natal/RN-1a73e8?style=for-the-badge&logo=whatsapp" alt="Suporte Local">
+  <img src="https://img.shields.io/badge/deploy-Vercel-000000?style=for-the-badge&logo=vercel" alt="Vercel">
+  <img src="https://img.shields.io/badge/banco-Supabase-3ecf8e?style=for-the-badge&logo=supabase" alt="Supabase">
+</p>
+
+<p align="center">
+  <strong>Sistema Completo de Gestão de Vendas com Cupom por WhatsApp</strong><br>
+  <em>Feito em Natal/RN com ❤️ para comerciantes brasileiros</em>
+</p>
+
+<p align="center">
+  <img width="800" src="https://via.placeholder.com/800x400/1a73e8/ffffff?text=PDV+Tanque+Digital+-+Dashboard+Profissional" alt="Dashboard PDV Tanque Digital">
+</p>
+
+---
 
 ## ✨ POR QUE ESCOLHER O PDV TANQUE DIGITAL?
 
@@ -51,29 +66,23 @@
 - ✅ Operador (vendas + fechamento)
 - ✅ Senhas individuais por operador
 
----
 
-### Primeiro Acesso
-1. Acesse seu link do Vercel (ex: `https://pdv-tanque-digital.vercel.app`)
-2. Clique em **"Ativar"**
-3. Digite o código: `TQD-DEMO-2024`
-4. Faça login:
-   - **Usuário:** `admin`
-   - **Senha:** `admin123`
+Primeiro Acesso
+Acesse seu link do Vercel (ex: https://pdv-tanque-digital.vercel.app)
+Clique em "Ativar"
+Digite o código: TQD-DEMO-2024
+Faça login:
+Usuário: admin
+Senha: admin123
+🖼️ GALLERY DE TELAS
+Dashboard
+PDV
+Cupom WhatsApp
 
----
 
-## 🖼️ GALLERY DE TELAS
 
-| Dashboard | PDV | Cupom WhatsApp |
-|-----------|-----|----------------|
-| ![Dashboard](https://via.placeholder.com/300x200/1a73e8/ffffff?text=Dashboard+Profissional) | ![PDV](https://via.placeholder.com/300x200/28a745/ffffff?text=PDV+com+Pagamento+Misto) | ![WhatsApp](https://via.placeholder.com/300x200/25d366/ffffff?text=Cupom+por+WhatsApp) |
-
----
-
-## 📁 ESTRUTURA DO PROJETO
-
-```
+📁 ESTRUTURA DO PROJETO
+123456789101112
 pdv-tanque-digital/
 ├── 📄 index.html          # Tela de login + ativação
 ├── 📄 dashboard.html      # Dashboard principal
@@ -84,104 +93,74 @@ pdv-tanque-digital/
 ├── 📁 css/                # Estilos profissionais
 │   ├── style.css
 │   └── dashboard.css
-├── 📄 vercel.json         # Configuração de deploy
-└── 📄 README.md           # Este arquivo 😊
-```
 
----
-
-## ⚙️ TECNOLOGIAS UTILIZADAS
-
-| Camada | Tecnologia | Porquê |
-|--------|------------|--------|
-| **Frontend** | HTML5 + CSS3 + JavaScript Puro | ✅ Leve, rápido, sem dependências |
-| **Banco** | Supabase (PostgreSQL) | ✅ Gratuito até 500MB, RLS de segurança |
-| **Deploy** | Vercel | ✅ Deploy 1-clique, SSL automático |
-| **Design** | CSS Puro com Gradientes | ✅ Sem frameworks pesados |
-
----
-
-## 📞 SUPORTE TÉCNICO
-
-### Contato Direto
-> **Akiles Leopoldo Nunes Simiao**  
-> 📍 Quiosque 40, Lagoa Azul, Natal/RN  
-> 📱 WhatsApp: **[Clique para conversar](https://wa.me/5584994533322)**  
-> ⏰ Horário: Seg-Sex, 8h às 18h
-
-### Resposta Garantida
-| Canal | Tempo Médio |
-|-------|-------------|
-| WhatsApp | ⚡ **2-5 minutos** |
-| E-mail | 📧 2-4 horas |
-| GitHub Issues | 💻 24 horas |
-
-> ✨ **Garantia Tanque Digital:** Seu problema resolvido ou reembolso do primeiro mês!
-
----
-
-## 💰 PLANOS DE PREÇOS
-
-| Plano | Preço | Incluso |
-|-------|-------|---------|
-| **Básico** | R$ 49/mês | ✅ PDV completo<br>✅ WhatsApp integrado<br>✅ Suporte ilimitado |
-| **Profissional** | R$ 89/mês | ✅ Tudo do Básico<br>✅ Relatórios avançados<br>✅ API de integração |
-| **Premium** | R$ 149/mês | ✅ Tudo do Profissional<br>✅ Treinamento presencial (Natal/RN)<br>✅ Backup diário |
-
-> 🔥 **Promoção de Lançamento:** Primeiros 10 clientes pagam **R$ 49/mês para sempre** (mesmo após promoção acabar)!
-
----
-
-## 📜 TERMOS DE USO
-
-- ✅ Licença comercial para uso em estabelecimentos comerciais
-- ✅ Proibida revenda ou redistribuição não autorizada
-- ✅ Suporte técnico incluído na mensalidade
-- ✅ Atualizações gratuitas vitalícias
-- ✅ Dados 100% seus — nunca vendemos ou compartilhamos
-
----
-
-## 🙏 AGRADECIMENTOS
-
-Desenvolvido com ❤️ por **Akiles Simião** da **Tanque Digital** para fortalecer o comércio local de Natal/RN e todo o Brasil.
-
-> *"Tecnologia a serviço do pequeno e médio empresário brasileiro"*
-
----
-
+⚙️ TECNOLOGIAS UTILIZADAS
+Camada
+Tecnologia
+Porquê
+Frontend
+HTML5 + CSS3 + JavaScript Puro
+✅ Leve, rápido, sem dependências
+Banco
+Supabase (PostgreSQL)
+✅ Gratuito até 500MB, RLS de segurança
+Deploy
+Vercel
+✅ Deploy 1-clique, SSL automático
+Design
+CSS Puro com Gradientes
+✅ Sem frameworks pesados
+📞 SUPORTE TÉCNICO
+Contato Direto
+Akiles Leopoldo Nunes Simiao
+📍 Quiosque 40, Lagoa Azul, Natal/RN
+📱 WhatsApp: Clique para conversar
+⏰ Horário: Seg-Sex, 8h às 18h
+Resposta Garantida
+Canal
+Tempo Médio
+WhatsApp
+⚡ 2-5 minutos
+E-mail
+📧 2-4 horas
+GitHub Issues
+💻 24 horas
+✨ Garantia Tanque Digital: Seu problema resolvido ou reembolso do primeiro mês!
+💰 PLANOS DE PREÇOS
+Plano
+Preço
+Incluso
+Básico
+R$ 49/mês
+✅ PDV completo
+✅ WhatsApp integrado
+✅ Suporte ilimitado
+Profissional
+R$ 89/mês
+✅ Tudo do Básico
+✅ Relatórios avançados
+✅ API de integração
+Premium
+R$ 149/mês
+✅ Tudo do Profissional
+✅ Treinamento presencial (Natal/RN)
+✅ Backup diário
+🔥 Promoção de Lançamento: Primeiros 10 clientes pagam R$ 49/mês para sempre (mesmo após promoção acabar)!
+📜 TERMOS DE USO
+✅ Licença comercial para uso em estabelecimentos comerciais
+✅ Proibida revenda ou redistribuição não autorizada
+✅ Suporte técnico incluído na mensalidade
+✅ Atualizações gratuitas vitalícias
+✅ Dados 100% seus — nunca vendemos ou compartilhamos
+🙏 AGRADECIMENTOS
+Desenvolvido com ❤️ por Akiles Simião da Tanque Digital para fortalecer o comércio local de Natal/RN e todo o Brasil.
+"Tecnologia a serviço do pequeno e médio empresário brasileiro"
 <p align="center">
-  <img src="https://img.shields.io/badge/Tanque%20Digital-PDV%20Profissional-1a73e8?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTEyLDIuNzVMMTkuMzMsNy41TDIwLDguNzVMMTIsMTMuNUw0LDguNzVMMC42Nyw3LjVMMSwyLjc1TDEyLDIuNzV6TTEyLDE4LjVsNy4zMzQtNC43NUgxNC41djMuNWgtM3YtMy41SDYuNjZMMTIsMTguNXoiLz48L3N2Zz4=" alt="Tanque Digital">
+<img src="https://img.shields.io/badge/Tanque%20Digital-PDV%20Profissional-1a73e8?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTEyLDIuNzVMMTkuMzMsNy41TDIwLDguNzVMMTIsMTMuNUw0LDguNzVMMC42Nyw3LjVMMSwyLjc1TDEyLDIuNzV6TTEyLDE4LjVsNy4zMzQtNC43NUgxNC41djMuNWgtM3YtMy41SDYuNjZMMTIsMTguNXoiLz48L3N2Zz4=" alt="Tanque Digital">
 </p>
 
 <p align="center">
-  <strong>PDV Tanque Digital © 2024 • Todos os direitos reservados</strong><br>
-  <em>Feito com ❤️ em Natal/RN para o Brasil</em>
+<strong>PDV Tanque Digital © 2024 • Todos os direitos reservados</strong><br>
+<em>Feito com ❤️ em Natal/RN para o Brasil</em>
 </p>
 ```
-
----
-
-## ✨ BÔNUS: BADGES PERSONALIZADOS (para copiar/colar)
-
-```markdown
-<!-- Badge Versão -->
-![Versão](https://img.shields.io/badge/versão-3.1-blue?style=for-the-badge&logo=github)
-
-<!-- Badge Suporte Local -->
-![Suporte Natal/RN](https://img.shields.io/badge/suporte-Natal/RN-1a73e8?style=for-the-badge&logo=whatsapp)
-
-<!-- Badge Deploy Vercel -->
-![Deploy Vercel](https://img.shields.io/badge/deploy-Vercel-000000?style=for-the-badge&logo=vercel)
-
-<!-- Badge Banco Supabase -->
-![Banco Supabase](https://img.shields.io/badge/banco-Supabase-3ecf8e?style=for-the-badge&logo=supabase)
-
-<!-- Badge Licença MIT -->
-![Licença MIT](https://img.shields.io/badge/licença-MIT-green?style=for-the-badge&logo=github)
-
-<!-- Badge Status Online -->
-![Status Online](https://img.shields.io/badge/status-online-brightgreen?style=for-the-badge&logo=github)
-```
-
-
