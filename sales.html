@@ -5,330 +5,775 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PDV Tanque Digital - Venda</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body{padding:20px;background:#f5f7fa}
-    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid #1a73e8}
-    .container{display:grid;grid-template-columns:1fr 350px;gap:25px;max-width:1400px;margin:0 auto}
-    .products{background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
-    .search{display:flex;gap:10px;margin-bottom:20px}
-    .search input{flex:1;padding:14px;border:2px solid #ddd;border-radius:8px;font-size:18px}
-    .search button{padding:0 25px;background:#1a73e8;color:#fff;border:none;border-radius:8px;font-size:18px;font-weight:600;cursor:pointer}
-    .cart{background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.08);display:flex;flex-direction:column}
-    .cart-title{font-size:20px;font-weight:700;margin-bottom:20px;color:#333;display:flex;justify-content:space-between}
-    .cart-items{flex:1;max-height:400px;overflow-y:auto;margin-bottom:20px}
-    .cart-item{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}
-    .item-name{font-weight:600}
-    .item-total{color:#1a73e8;font-weight:700}
-    .payment-methods{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
-    .pay-btn{padding:15px;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px}
-    .pay-btn.cash{background:#28a745;color:#fff}
-    .pay-btn.pix{background:#00c853;color:#fff}
-    .pay-btn.card{background:#ffc107;color:#333}
-    .pay-btn.mixed{background:#6f42c1;color:#fff}
-    .pay-inputs{display:none;margin-bottom:20px}
-    .pay-inputs.active{display:block}
-    .pay-row{display:flex;gap:10px;margin-bottom:12px}
-    .pay-row input{flex:1;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:18px;text-align:right}
-    .pay-row label{font-weight:600;color:#555}
-    .total{font-size:28px;font-weight:700;text-align:center;margin:20px 0;color:#1a73e8}
-    .actions{display:flex;gap:15px}
-    .btn{flex:1;padding:18px;border:none;border-radius:10px;font-size:18px;font-weight:700;cursor:pointer}
-    .btn-cancel{background:#dc3545;color:#fff}
-    .btn-finalize{background:#1a73e8;color:#fff}
-    .customer{margin-bottom:20px;padding:15px;background:#e8f0fe;border-radius:10px}
-    .customer input{width:100%;padding:12px;margin-top:8px;border:2px solid #1a73e8;border-radius:8px;font-size:16px}
-    @media (max-width:900px){.container{grid-template-columns:1fr}}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #0d62d9;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --dark: #212529;
+      --light: #f8f9fa;
+      --gray: #6c757d;
+      --border: #e9ecef;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .header {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #1a73e8, #6f42c1);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--dark);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+    }
+
+    .logo h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+    }
+
+    .user-details {
+      text-align: right;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 16px;
+    }
+
+    .user-role {
+      color: var(--gray);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 25px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .products-section {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .customer-info {
+      background: #e8f0fe;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 25px;
+      border-left: 4px solid var(--primary);
+    }
+
+    .customer-title {
+      font-size: 18px;
+      color: var(--dark);
+      margin-bottom: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .customer-title i {
+      color: var(--primary);
+    }
+
+    .customer-input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+
+    .customer-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
+    }
+
+    .search-section {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 18px;
+      transition: all 0.3s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
+    }
+
+    .btn-search {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 0 25px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+    }
+
+    .btn-search:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
+    }
+
+    .cart-section {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .cart-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .cart-title h2 {
+      font-size: 20px;
+      color: var(--dark);
+      font-weight: 700;
+    }
+
+    .cart-count {
+      background: #e9ecef;
+      color: var(--gray);
+      border-radius: 20px;
+      padding: 6px 15px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .cart-items {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 25px;
+      padding-right: 5px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+      transition: all 0.2s;
+    }
+
+    .cart-item:hover {
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .item-quantity {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--gray);
+      font-size: 14px;
+    }
+
+    .item-quantity button {
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 8px;
+      background: #f8f9fa;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .item-quantity button:hover {
+      background: #e9ecef;
+      transform: scale(1.1);
+    }
+
+    .item-total {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 16px;
+      font-size: 16px;
+    }
+
+    .cart-summary {
+      background: #f8f9fa;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 15px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      font-size: 16px;
+    }
+
+    .summary-row.total {
+      font-size: 20px;
+      font-weight: 700;
+      border-top: 2px solid #e9ecef;
+      padding-top: 15px;
+      margin-top: 10px;
+    }
+
+    .payment-section {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      margin-top: 25px;
+    }
+
+    .payment-title {
+      font-size: 20px;
+      color: var(--dark);
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .payment-title i {
+      color: var(--primary);
+    }
+
+    .payment-methods {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .payment-btn {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .payment-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      border-color: var(--primary);
+    }
+
+    .payment-btn.cash {
+      border-color: var(--success);
+    }
+
+    .payment-btn.cash:hover {
+      border-color: var(--success);
+      background: #d4edda;
+    }
+
+    .payment-btn.pix {
+      border-color: #00c853;
+    }
+
+    .payment-btn.pix:hover {
+      border-color: #00c853;
+      background: #d4edda;
+    }
+
+    .payment-btn.card {
+      border-color: var(--warning);
+    }
+
+    .payment-btn.card:hover {
+      border-color: var(--warning);
+      background: #fff3cd;
+    }
+
+    .payment-btn.mixed {
+      border-color: #6f42c1;
+    }
+
+    .payment-btn.mixed:hover {
+      border-color: #6f42c1;
+      background: #e8d5ff;
+    }
+
+    .payment-btn i {
+      font-size: 28px;
+    }
+
+    .payment-inputs {
+      display: none;
+      margin-bottom: 25px;
+    }
+
+    .payment-inputs.active {
+      display: block;
+    }
+
+    .pay-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .pay-row label {
+      flex: 1;
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 16px;
+    }
+
+    .pay-row input {
+      flex: 2;
+      padding: 14px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 18px;
+      text-align: right;
+      transition: all 0.3s;
+    }
+
+    .pay-row input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
+    }
+
+    .pay-row input::placeholder {
+      color: #adb5bd;
+    }
+
+    .change-display {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 18px;
+      margin-top: 15px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .btn-action {
+      padding: 18px;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .btn-cancel {
+      background: var(--danger);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-cancel:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+
+    .btn-finalize {
+      background: var(--primary);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+    }
+
+    .btn-finalize:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
+    }
+
+    .empty-cart {
+      text-align: center;
+      padding: 60px 0;
+      color: #999;
+    }
+
+    .empty-cart i {
+      font-size: 60px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    /* Thermal Receipt Style */
+    .thermal-receipt {
+      width: 300px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      font-family: monospace;
+      font-size: 14px;
+      line-height: 1.4;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+    }
+
+    .receipt-header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .receipt-header h2 {
+      font-size: 20px;
+      margin: 5px 0;
+      color: var(--dark);
+    }
+
+    .receipt-items {
+      margin: 15px 0;
+    }
+
+    .receipt-items table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .receipt-items th {
+      text-align: left;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      font-weight: 600;
+    }
+
+    .receipt-items td {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .receipt-footer {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 500px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      animation: modalSlide 0.3s ease;
+    }
+
+    @keyframes modalSlide {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .modal-content h2 {
+      margin: 15px 0;
+      color: var(--dark);
+      font-size: 22px;
+    }
+
+    .modal-content p {
+      color: var(--gray);
+      margin: 10px 0;
+      line-height: 1.6;
+    }
+
+    .btn-modal {
+      margin-top: 20px;
+      padding: 12px 30px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-modal:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .close {
+      position: absolute;
+      right: 20px;
+      top: 15px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .close:hover {
+      color: #333;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+
+      .payment-methods {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="logo">
-      <i class="fas fa-gas-pump"></i>
-      <span>PDV Tanque Digital</span>
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <i class="fas fa-gas-pump"></i>
+      </div>
+      <h1>PDV Tanque Digital</h1>
+    </a>
+    
+    <div class="user-info">
+      <div class="user-details">
+        <div class="user-name" id="userName">Carregando...</div>
+        <div class="user-role" id="userRole">-</div>
+      </div>
     </div>
-    <div class="operator" id="operatorName">Operador: Carregando...</div>
   </div>
-  
+
   <div class="container">
-    <div class="products">
-      <div class="customer">
-        <div style="font-weight:600;margin-bottom:8px">Cliente (opcional)</div>
-        <input type="text" id="customerName" placeholder="Nome do cliente">
-        <input type="text" id="customerDoc" placeholder="CPF ou CNPJ" maxlength="18" style="margin-top:10px">
+    <div class="products-section">
+      <div class="customer-info">
+        <h3 class="customer-title">
+          <i class="fas fa-user"></i> Cliente (opcional)
+        </h3>
+        
+        <input type="text" id="customerName" class="customer-input" placeholder="Nome do cliente">
+        <input type="text" id="customerDoc" class="customer-input" placeholder="CPF ou CNPJ (somente números)">
       </div>
       
-      <div class="search">
-        <input type="text" id="search" placeholder="Código ou nome do produto..." autofocus>
-        <button onclick="addProduct()"><i class="fas fa-plus"></i> Adicionar</button>
+      <div class="search-section">
+        <input type="text" id="search" class="search-input" placeholder="Código ou nome do produto..." autofocus>
+        <button class="btn-search" onclick="addProduct()">
+          <i class="fas fa-plus"></i> Adicionar
+        </button>
       </div>
       
       <div class="cart-items" id="cartItems">
-        <div style="text-align:center;padding:40px;color:#999">
-          <i class="fas fa-shopping-cart" style="font-size:40px;margin-bottom:15px"></i>
+        <div class="empty-cart">
+          <i class="fas fa-shopping-cart"></i>
           <p>Nenhum produto adicionado</p>
         </div>
       </div>
     </div>
     
-    <div class="cart">
+    <div class="cart-section">
       <div class="cart-title">
-        <span>Carrinho</span>
-        <span id="itemCount">0 itens</span>
+        <h2><i class="fas fa-shopping-cart"></i> Carrinho</h2>
+        <span class="cart-count" id="itemCount">0 itens</span>
       </div>
       
       <div id="cartList"></div>
       
-      <div class="total">Total: R$ <span id="total">0,00</span></div>
-      
-      <div class="payment-methods">
-        <button class="pay-btn cash" onclick="setPayment('cash')">
-          <i class="fas fa-money-bill"></i> Dinheiro
-        </button>
-        <button class="pay-btn pix" onclick="setPayment('pix')">
-          <i class="fab fa-pix"></i> PIX
-        </button>
-        <button class="pay-btn card" onclick="setPayment('card')">
-          <i class="fas fa-credit-card"></i> Cartão
-        </button>
-        <button class="pay-btn mixed" onclick="setPayment('mixed')">
-          <i class="fas fa-calculator"></i> Misto
-        </button>
-      </div>
-      
-      <div class="pay-inputs" id="mixedInputs">
-        <div class="pay-row">
-          <label>Dinheiro</label>
-          <input type="number" id="payCash" value="0.00" step="0.01" oninput="calculateChange()">
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span id="subtotal">R$ 0,00</span>
         </div>
-        <div class="pay-row">
-          <label>PIX</label>
-          <input type="number" id="payPix" value="0.00" step="0.01" oninput="calculateChange()">
+        <div class="summary-row">
+          <span>Desconto:</span>
+          <span id="discount">R$ 0,00</span>
         </div>
-        <div class="pay-row">
-          <label>Cartão</label>
-          <input type="number" id="payCard" value="0.00" step="0.01" oninput="calculateChange()">
-        </div>
-        <div class="pay-row" style="font-weight:700;color:#1a73e8">
-          <label>Troco</label>
-          <span id="change">R$ 0,00</span>
+        <div class="summary-row total">
+          <span><strong>Total:</strong></span>
+          <span id="total"><strong>R$ 0,00</strong></span>
         </div>
       </div>
       
-      <div class="actions">
-        <button class="btn btn-cancel" onclick="clearCart()"><i class="fas fa-times"></i> Cancelar</button>
-        <button class="btn btn-finalize" onclick="finalizeSale()"><i class="fas fa-check"></i> Finalizar</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // 🔐 CONFIGURAÇÃO SEGURA - SUBSTITUA PELAS SUAS CHAVES
-    const SUPABASE_URL = 'https://qxgwpcpgkemxnjfyncfu.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Z3dwY3Bna2VteG5qZnluY2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzUyMzcsImV4cCI6MjA4NjE1MTIzN30.7a5RzenN6rHGyoaxewxs05rGEH9cXj7sxRtfxGVl0SI';
-    
-    const supabase = window.supabase.create({
-      supabaseUrl: SUPABASE_URL,
-      supabaseKey: SUPABASE_ANON_KEY
-    });
-
-    let cart = [];
-    let paymentMethod = 'cash';
-    
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('operatorName').textContent = `Operador: ${localStorage.getItem('username') || 'Desconhecido'}`;
-      
-      document.getElementById('search').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addProduct();
-      });
-      
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'F2') finalizeSale();
-        if (e.key === 'Escape') clearCart();
-      });
-      
-      setPayment('cash');
-    });
-    
-    async function addProduct() {
-      const searchTerm = document.getElementById('search').value.trim();
-      if (!searchTerm) return;
-      
-      const { data } = await supabase
-        .from('products')
-        .select('*')
-        .eq('company_id', localStorage.getItem('companyId'))
-        .or(`code.eq.${searchTerm},name.ilike.%${searchTerm}%`)
-        .limit(1);
-      
-      if (!data || data.length === 0) {
-        alert('Produto não encontrado!');
-        return;
-      }
-      
-      const product = data[0];
-      const existing = cart.find(p => p.id === product.id);
-      
-      if (existing) {
-        existing.qty++;
-      } else {
-        cart.push({
-          id: product.id,
-          name: product.name,
-          price: parseFloat(product.price),
-          qty: 1
-        });
-      }
-      
-      updateCart();
-      document.getElementById('search').value = '';
-    }
-    
-    function updateCart() {
-      document.getElementById('itemCount').textContent = `${cart.reduce((sum, p) => sum + p.qty, 0)} itens`;
-      
-      if (cart.length === 0) {
-        document.getElementById('cartList').innerHTML = '';
-        document.getElementById('total').textContent = '0,00';
-        return;
-      }
-      
-      let html = '';
-      cart.forEach((item, index) => {
-        html += `
-          <div class="cart-item">
-            <div>
-              <div class="item-name">${item.name}</div>
-              <div>${item.qty} x R$ ${item.price.toFixed(2).replace('.', ',')}</div>
-            </div>
-            <div class="item-total">R$ ${(item.price * item.qty).toFixed(2).replace('.', ',')}</div>
-          </div>
-        `;
-      });
-      
-      document.getElementById('cartList').innerHTML = html;
-      
-      const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      document.getElementById('total').textContent = total.toFixed(2).replace('.', ',');
-      
-      calculateChange();
-    }
-    
-    function setPayment(method) {
-      paymentMethod = method;
-      document.getElementById('mixedInputs').classList.toggle('active', method === 'mixed');
-      
-      const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      
-      if (method === 'cash') {
-        document.getElementById('payCash').value = total.toFixed(2);
-        document.getElementById('payPix').value = '0.00';
-        document.getElementById('payCard').value = '0.00';
-      } else if (method === 'pix') {
-        document.getElementById('payCash').value = '0.00';
-        document.getElementById('payPix').value = total.toFixed(2);
-        document.getElementById('payCard').value = '0.00';
-      } else if (method === 'card') {
-        document.getElementById('payCash').value = '0.00';
-        document.getElementById('payPix').value = '0.00';
-        document.getElementById('payCard').value = total.toFixed(2);
-      }
-      
-      calculateChange();
-    }
-    
-    function calculateChange() {
-      const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      const cash = parseFloat(document.getElementById('payCash').value) || 0;
-      const pix = parseFloat(document.getElementById('payPix').value) || 0;
-      const card = parseFloat(document.getElementById('payCard').value) || 0;
-      
-      const paid = cash + pix + card;
-      const change = paid - total;
-      
-      document.getElementById('change').textContent = `R$ ${Math.max(0, change).toFixed(2).replace('.', ',')}`;
-    }
-    
-    async function finalizeSale() {
-      if (cart.length === 0) return alert('Adicione produtos ao carrinho!');
-      
-      // Obter próximo número de série
-      const {  lastSale } = await supabase
-        .from('sales')
-        .select('receipt_serial')
-        .eq('company_id', localStorage.getItem('companyId'))
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      
-      let serialNum = 1;
-      if (lastSale && lastSale.receipt_serial) {
-        serialNum = parseInt(lastSale.receipt_serial.split('-')[1]) + 1;
-      }
-      const receiptSerial = `111-${String(serialNum).padStart(6, '0')}`;
-      
-      const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      const cash = parseFloat(document.getElementById('payCash').value) || 0;
-      const pix = parseFloat(document.getElementById('payPix').value) || 0;
-      const card = parseFloat(document.getElementById('payCard').value) || 0;
-      const change = Math.max(0, (cash + pix + card) - total);
-      
-      // Salvar venda
-      const {  sale } = await supabase
-        .from('sales')
-        .insert({
-          company_id: localStorage.getItem('companyId'),
-          sale_number: Date.now(),
-          receipt_serial: receiptSerial,
-          total_amount: total,
-          payment_cash: cash,
-          payment_pix: pix,
-          payment_card: card,
-          change_amount: change,
-          customer_name: document.getElementById('customerName').value || null,
-          customer_document: document.getElementById('customerDoc').value || null,
-          operator_id: localStorage.getItem('userId')
-        })
-        .select()
-        .single();
-      
-      alert(`✅ Venda ${receiptSerial} concluída!\nTotal: R$ ${total.toFixed(2)}\nTroco: R$ ${change.toFixed(2)}`);
-      
-      // Enviar por WhatsApp se tiver CPF/CNPJ
-      const customerDoc = document.getElementById('customerDoc').value.trim();
-      if (customerDoc) {
-        const whatsappText = `
-*PDV TANQUE DIGITAL*
-*Cupom:* ${receiptSerial}
-*Cliente:* ${document.getElementById('customerName').value || 'Não informado'}
-*CPF/CNPJ:* ${customerDoc}
-
-*Itens:*
-${cart.map(item => `${item.name} (${item.qty}x) R$ ${(item.price * item.qty).toFixed(2)}`).join('\n')}
-
-*Total:* R$ ${total.toFixed(2)}
-*Troco:* R$ ${change.toFixed(2)}
-*Operador:* ${localStorage.getItem('username')}
-        `.trim();
+      <div class="payment-section">
+        <h2 class="payment-title">
+          <i class="fas fa-credit-card"></i> Pagamento
+        </h2>
         
-        if (confirm('Enviar cupom para WhatsApp do cliente?')) {
-          const phone = prompt('Digite o WhatsApp do cliente (somente números com DDD):');
-          if (phone && phone.length >= 11) {
-            window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(whatsappText)}`, '_blank');
-          }
-        }
-      }
-      
-      clearCart();
-    }
-    
-    function clearCart() {
-      cart = [];
-      updateCart();
-      document.getElementById('customerName').value = '';
-      document.getElementById('customerDoc').value = '';
-    }
-  </script>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-</body>
-</html>
+        <div class="payment-methods">
+          <button class="payment-btn cash" onclick="setPayment('cash')">
+            <i class="fas fa-money-bill"></i>
+            <span>Dinheiro</span>
+          </button>
+          <button class="payment-btn pix" onclick="setPayment('pix')">
+            <i class="fab fa-pix"></i>
+            <span>PIX</span>
+          </button>
+          <button class="payment-btn card" onclick="setPayment('card')">
+            <i class="fas fa-credit-card"></i>
+            <span>Cartão</span>
+          </button>
+          <button class="payment-btn mixed" onclick="setPayment('mixed')">
+            <i class="fas fa-calculator"></i>
+            <span>Misto</span>
+          </button>
+        </div>
+        
+        <div class="payment-inputs" id="paymentInputs">
+          <div class="pay-row">
+            <label><i class="fas fa-money-bill"></i> Dinheiro</label>
+            <input type="number" id="payCash" step="0.01" value="0.00">
+          </div>
+          <div class="pay-row">
+            <label><i class="fab fa-pix"></i> PIX</label>
+            <input type="number" id="payPix" step="0.01" value="0.00">
+          </div>
+          <div class="pay-row">
+            <label><i class="fas fa-credit-card"></i> Cartão</label>
+           
