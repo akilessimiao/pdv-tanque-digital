@@ -776,4 +776,482 @@
           </div>
           <div class="pay-row">
             <label><i class="fas fa-credit-card"></i> Cartão</label>
-           
+            <input type="number" id="payCard" step="0.01" value="0.00">
+          </div>
+          
+          <div class="change-display">
+            <span>Troco:</span>
+            <span id="changeAmount">R$ 0,00</span>
+          </div>
+        </div>
+        
+        <div class="actions">
+          <button class="btn-action btn-cancel" onclick="clearCart()">
+            <i class="fas fa-times"></i> Cancelar
+          </button>
+          <button class="btn-action btn-finalize" onclick="finalizeSale()">
+            <i class="fas fa-check"></i> Finalizar Venda
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Receipt Options -->
+  <div class="modal" id="receiptModal">
+    <div class="modal-content">
+      <span class="close" onclick="closeReceiptModal()">&times;</span>
+      <h2><i class="fas fa-receipt"></i> Cupom Fiscal</h2>
+      
+      <div class="thermal-receipt" id="receiptPreview">
+        <!-- Preview será gerado aqui -->
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn-modal" onclick="printReceipt()">
+          <i class="fas fa-print"></i> Imprimir
+        </button>
+        <button class="btn-modal" onclick="sendWhatsApp()">
+          <i class="fab fa-whatsapp"></i> Enviar via WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://qxgwpcpgkemxnjfyncfu.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Z3dwY3Bna2VteG5qZnluY2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzUyMzcsImV4cCI6MjA4NjE1MTIzN30.7a5RzenN6rHGyoaxewxs05rGEH9cXj7sxRtfxGVl0SI';
+    const supabase = window.supabase.create({ supabaseUrl: SUPABASE_URL, supabaseKey: SUPABASE_ANON_KEY });
+
+    let currentUser = null;
+    let currentCompany = null;
+    let cart = [];
+    let paymentMethod = 'cash';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('userName').textContent = localStorage.getItem('username');
+      document.getElementById('userRole').textContent = 
+        localStorage.getItem('role') === 'admin' ? 'Administrador' : 'Operador';
+      
+      // Atalhos de teclado
+      document.getElementById('search').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addProduct();
+      });
+      
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'F2') finalizeSale();
+        if (e.key === 'Escape') clearCart();
+      });
+      
+      // Inicializar
+      setPayment('cash');
+    });
+
+    async function addProduct() {
+      const searchTerm = document.getElementById('search').value.trim();
+      if (!searchTerm) return;
+      
+      const { data } = await supabase
+        .from('products')
+        .select('*')
+        .eq('company_id', localStorage.getItem('companyId'))
+        .or(`code.eq.${searchTerm},name.ilike.%${searchTerm}%`)
+        .limit(1);
+      
+      if (data && data.length > 0) {
+        addToCart(data[0]);
+        document.getElementById('search').value = '';
+      } else {
+        alert('Produto não encontrado!');
+      }
+    }
+
+    function addToCart(product) {
+      // Verificar estoque
+      if (product.stock <= 0) {
+        alert('Produto sem estoque!');
+        return;
+      }
+      
+      // Verificar se já está no carrinho
+      const existing = cart.find(item => item.id === product.id);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({
+          id: product.id,
+          code: product.code,
+          name: product.name,
+          price: parseFloat(product.price),
+          quantity: 1,
+          stock: product.stock
+        });
+      }
+      
+      updateCartDisplay();
+    }
+
+    function updateCartDisplay() {
+      const cartItemsEl = document.getElementById('cartItems');
+      const cartCountEl = document.getElementById('itemCount');
+      const subtotalEl = document.getElementById('subtotal');
+      
+      cartCountEl.textContent = `${cart.length} item${cart.length !== 1 ? 's' : ''}`;
+      
+      if (cart.length === 0) {
+        cartItemsEl.innerHTML = `
+          <div class="empty-cart">
+            <i class="fas fa-shopping-cart"></i>
+            <p>Nenhum produto adicionado</p>
+          </div>
+        `;
+        subtotalEl.textContent = 'R$ 0,00';
+        document.getElementById('total').textContent = 'R$ 0,00';
+        return;
+      }
+      
+      let subtotal = 0;
+      cartItemsEl.innerHTML = cart.map((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        subtotal += itemTotal;
+        
+        return `
+          <div class="cart-item">
+            <div class="item-info">
+              <div class="item-name">${item.name}</div>
+              <div class="item-quantity">
+                <button onclick="updateQuantity(${index}, -1)">-</button>
+                <span>${item.quantity}</span>
+                <button onclick="updateQuantity(${index}, 1)">+</button>
+              </div>
+            </div>
+            <div class="item-total">${formatCurrency(itemTotal)}</div>
+          </div>
+        `;
+      }).join('');
+      
+      subtotalEl.textContent = formatCurrency(subtotal);
+      document.getElementById('total').textContent = formatCurrency(subtotal);
+      document.getElementById('discount').textContent = 'R$ 0,00';
+      
+      // Atualizar cálculo de troco
+      calculateChange();
+    }
+
+    function updateQuantity(index, delta) {
+      cart[index].quantity += delta;
+      if (cart[index].quantity <= 0) {
+        cart.splice(index, 1);
+      }
+      updateCartDisplay();
+    }
+
+    function clearCart() {
+      cart = [];
+      updateCartDisplay();
+      document.getElementById('customerName').value = '';
+      document.getElementById('customerDoc').value = '';
+    }
+
+    function setPayment(method) {
+      paymentMethod = method;
+      document.getElementById('paymentInputs').classList.toggle('active', method === 'mixed');
+      
+      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      
+      if (method === 'cash') {
+        document.getElementById('payCash').value = total.toFixed(2);
+        document.getElementById('payPix').value = '0.00';
+        document.getElementById('payCard').value = '0.00';
+      } else if (method === 'pix') {
+        document.getElementById('payCash').value = '0.00';
+        document.getElementById('payPix').value = total.toFixed(2);
+        document.getElementById('payCard').value = '0.00';
+      } else if (method === 'card') {
+        document.getElementById('payCash').value = '0.00';
+        document.getElementById('payPix').value = '0.00';
+        document.getElementById('payCard').value = total.toFixed(2);
+      }
+      
+      calculateChange();
+    }
+
+    function calculateChange() {
+      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const cash = parseFloat(document.getElementById('payCash').value) || 0;
+      const pix = parseFloat(document.getElementById('payPix').value) || 0;
+      const card = parseFloat(document.getElementById('payCard').value) || 0;
+      
+      const paid = cash + pix + card;
+      const change = paid - total;
+      
+      document.getElementById('changeAmount').textContent = formatCurrency(Math.max(0, change));
+    }
+
+    async function finalizeSale() {
+      if (cart.length === 0) {
+        alert('Adicione produtos ao carrinho!');
+        return;
+      }
+      
+      // Obter próximo número de série
+      const {  lastSale } = await supabase
+        .from('sales')
+        .select('receipt_serial')
+        .eq('company_id', localStorage.getItem('companyId'))
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      let receiptSerial = '111-000001';
+      if (lastSale && lastSale.receipt_serial) {
+        const lastNum = parseInt(lastSale.receipt_serial.split('-')[1]);
+        receiptSerial = `111-${String(lastNum + 1).padStart(6, '0')}`;
+      }
+      
+      // Calcular totais
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const total = subtotal;
+      const cash = parseFloat(document.getElementById('payCash').value) || 0;
+      const pix = parseFloat(document.getElementById('payPix').value) || 0;
+      const card = parseFloat(document.getElementById('payCard').value) || 0;
+      const change = parseFloat(document.getElementById('changeAmount').textContent.replace(/[^0-9,-]/g, '').replace(',', '.')) || 0;
+      
+      // Salvar venda
+      const {  newSale } = await supabase
+        .from('sales')
+        .insert({
+          company_id: localStorage.getItem('companyId'),
+          sale_number: Date.now(),
+          receipt_serial: receiptSerial,
+          total_amount: total,
+          payment_cash: cash,
+          payment_pix: pix,
+          payment_card: card,
+          change_amount: change,
+          customer_name: document.getElementById('customerName').value || null,
+          customer_document: document.getElementById('customerDoc').value || null,
+          operator_id: localStorage.getItem('userId')
+        })
+        .select()
+        .single();
+      
+      // Salvar itens da venda
+      for (const item of cart) {
+        await supabase.from('sale_items').insert({
+          sale_id: newSale.id,
+          product_name: item.name,
+          quantity: item.quantity,
+          unit_price: item.price,
+          total_price: item.price * item.quantity
+        });
+        
+        // Atualizar estoque
+        await supabase
+          .from('products')
+          .update({ stock: item.stock - item.quantity })
+          .eq('id', item.id);
+      }
+      
+      // Gerar cupom
+      generateReceipt(newSale, cart);
+      document.getElementById('receiptModal').style.display = 'flex';
+      
+      // Limpar carrinho
+      cart = [];
+      updateCartDisplay();
+      document.getElementById('customerName').value = '';
+      document.getElementById('customerDoc').value = '';
+    }
+
+    function generateReceipt(sale, items) {
+      const receiptEl = document.getElementById('receiptPreview');
+      
+      // Cabeçalho
+      let receiptHTML = `
+        <div class="receipt-header">
+          <h2>PDV Tanque Digital</h2>
+          <p>CNPJ: 00.000.000/0000-00</p>
+          <p><strong>CUPOM FISCAL</strong></p>
+          <p>Nº ${sale.receipt_serial}</p>
+          <hr>
+        </div>
+      `;
+      
+      // Itens
+      receiptHTML += `
+        <div class="receipt-items">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Qtde</th>
+                <th>Vl Unit</th>
+                <th>Vl Total</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      items.forEach(item => {
+        receiptHTML += `
+          <tr>
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>${formatCurrency(item.price)}</td>
+            <td>${formatCurrency(item.price * item.quantity)}</td>
+          </tr>
+        `;
+      });
+      
+      // Totais
+      const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      receiptHTML += `
+            </tbody>
+          </table>
+          <hr>
+          <div class="summary-row">
+            <span>Subtotal:</span>
+            <span>${formatCurrency(subtotal)}</span>
+          </div>
+          <div class="summary-row total">
+            <span><strong>Total:</strong></span>
+            <span><strong>${formatCurrency(subtotal)}</strong></span>
+          </div>
+          <hr>
+      `;
+      
+      // Pagamento
+      if (sale.payment_cash > 0) {
+        receiptHTML += `<div class="summary-row"><span>DINHEIRO:</span><span>${formatCurrency(sale.payment_cash)}</span></div>`;
+      }
+      if (sale.payment_pix > 0) {
+        receiptHTML += `<div class="summary-row"><span>PIX:</span><span>${formatCurrency(sale.payment_pix)}</span></div>`;
+      }
+      if (sale.payment_card > 0) {
+        receiptHTML += `<div class="summary-row"><span>CARTÃO:</span><span>${formatCurrency(sale.payment_card)}</span></div>`;
+      }
+      if (sale.change_amount > 0) {
+        receiptHTML += `<div class="summary-row"><span>TROCO:</span><span>${formatCurrency(sale.change_amount)}</span></div>`;
+      }
+      
+      // Rodapé
+      receiptHTML += `
+          <hr>
+          <div class="receipt-footer">
+            <p><strong>OPERADOR:</strong> ${localStorage.getItem('username')}</p>
+            <p><strong>DATA/HORA:</strong> ${new Date().toLocaleDateString('pt-BR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}</p>
+            <p>*** Obrigado pela preferência! ***</p>
+            <p>*** Este cupom é sua garantia ***</p>
+          </div>
+        </div>
+      `;
+      
+      receiptEl.innerHTML = receiptHTML;
+    }
+
+    function printReceipt() {
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Cupom Fiscal</title>
+          <style>
+            body { font-family: 'Courier New', monospace; width: 300px; margin: 0; padding: 10px; }
+            .thermal-receipt { width: 100%; }
+            h2 { text-align: center; margin: 5px 0; font-size: 14px; }
+            p { margin: 2px 0; font-size: 10px; }
+            table { width: 100%; font-size: 9px; border-collapse: collapse; }
+            th, td { padding: 2px; text-align: left; }
+            hr { border: 0; border-top: 1px dashed #000; margin: 5px 0; }
+            .summary-row { display: flex; justify-content: space-between; }
+            .summary-row.total { font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          ${document.getElementById('receiptPreview').innerHTML}
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+      printWindow.close();
+    }
+
+    function sendWhatsApp() {
+      const receiptText = generateReceiptText();
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(receiptText)}`;
+      window.open(whatsappUrl, '_blank');
+    }
+
+    function generateReceiptText() {
+      const receipt = document.getElementById('receiptPreview');
+      const customerName = document.getElementById('customerName').value;
+      const customerDoc = document.getElementById('customerDoc').value;
+      
+      let text = `*PDV TANQUE DIGITAL*\n`;
+      text += `CNPJ: 00.000.000/0000-00\n\n`;
+      text += `*CUPOM FISCAL*\n`;
+      text += `Nº ${receipt.querySelector('.receipt-header p:nth-child(4)').textContent.split(' ')[1]}\n\n`;
+      
+      if (customerName || customerDoc) {
+        text += `*CLIENTE:* ${customerName || '-'}\n`;
+        text += `*CPF/CNPJ:* ${customerDoc || '-'}\n\n`;
+      }
+      
+      text += `ITEM | QTD | VL UNIT | VL TOTAL\n`;
+      text += `--------------------------------\n`;
+      
+      const items = cart;
+      items.forEach(item => {
+        text += `${item.name.substring(0, 20)} | ${item.quantity} | ${formatCurrency(item.price)} | ${formatCurrency(item.price * item.quantity)}\n`;
+      });
+      
+      const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      text += `\n*SUBTOTAL:* ${formatCurrency(subtotal)}\n`;
+      text += `*TOTAL:* ${formatCurrency(subtotal)}\n\n`;
+      
+      const cash = parseFloat(document.getElementById('payCash').value) || 0;
+      const pix = parseFloat(document.getElementById('payPix').value) || 0;
+      const card = parseFloat(document.getElementById('payCard').value) || 0;
+      const change = parseFloat(document.getElementById('changeAmount').textContent.replace(/[^0-9,-]/g, '').replace(',', '.')) || 0;
+      
+      if (cash > 0) text += `*DINHEIRO:* ${formatCurrency(cash)}\n`;
+      if (pix > 0) text += `*PIX:* ${formatCurrency(pix)}\n`;
+      if (card > 0) text += `*CARTÃO:* ${formatCurrency(card)}\n`;
+      if (change > 0) text += `*TROCO:* ${formatCurrency(change)}\n\n`;
+      
+      text += `*OPERADOR:* ${localStorage.getItem('username')}\n`;
+      text += `*DATA:* ${new Date().toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })}\n\n`;
+      text += `*** Obrigado pela preferência! ***\n`;
+      text += `*** Este cupom é sua garantia ***`;
+      
+      return text;
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').style.display = 'none';
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(value);
+    }
+  </script>
+</body>
+</html>

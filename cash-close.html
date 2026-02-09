@@ -5,43 +5,290 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PDV Tanque Digital - Fechamento de Caixa</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body{padding:20px;background:#f5f7fa}
-    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;padding-bottom:15px;border-bottom:2px solid #1a73e8}
-    .container{max-width:800px;margin:0 auto;background:#fff;border-radius:12px;padding:30px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
-    .card-title{font-size:24px;font-weight:700;margin-bottom:20px;color:#dc3545;text-align:center}
-    .summary-box{background:#f8d7da;padding:20px;border-radius:8px;margin-bottom:20px;border-left:4px solid #dc3545}
-    .summary-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1b0b7}
-    .summary-row:last-child{border-bottom:none;font-weight:700;font-size:18px;color:#721c24}
-    .summary-label{color:#721c24}
-    .summary-value{color:#dc3545;font-weight:700}
-    .form-group{margin-bottom:20px}
-    .form-group label{display:block;margin-bottom:8px;font-weight:600;color:#333}
-    .form-group input{width:100%;padding:14px;border:2px solid #ddd;border-radius:8px;font-size:18px;text-align:right}
-    .btn{width:100%;padding:16px;background:#dc3545;color:#fff;border:none;border-radius:10px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px}
-    .btn:hover{background:#c82333}
-    .btn-secondary{background:#6c757d}
-    .btn-secondary:hover{background:#5a6268}
-    .alert{padding:15px;background:#fff3cd;border-radius:8px;margin-bottom:20px;border-left:4px solid #ffc107;text-align:center;font-weight:600;color:#856404}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #0d62d9;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --dark: #212529;
+      --light: #f8f9fa;
+      --gray: #6c757d;
+      --border: #e9ecef;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .header {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #1a73e8, #6f42c1);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--dark);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+    }
+
+    .logo h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+    }
+
+    .user-details {
+      text-align: right;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 16px;
+    }
+
+    .user-role {
+      color: var(--gray);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-title {
+      font-size: 24px;
+      color: var(--dark);
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .card-title i {
+      color: var(--danger);
+    }
+
+    .summary-box {
+      background: #f8f9fa;
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border-left: 4px solid var(--danger);
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1b0b7;
+      font-size: 16px;
+      color: var(--dark);
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--danger);
+    }
+
+    .summary-label {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    .summary-value {
+      font-weight: 700;
+      color: var(--danger);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 16px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 18px;
+      text-align: right;
+      transition: all 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 18px;
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--gray);
+      box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    .alert {
+      padding: 15px;
+      background: #fff3cd;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--warning);
+      text-align: center;
+      font-weight: 600;
+      color: #856404;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .loading i {
+      font-size: 40px;
+      color: var(--primary);
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="logo">
-      <i class="fas fa-gas-pump"></i>
-      <span>PDV Tanque Digital</span>
-    </div>
-    <div class="operator" id="operatorName">Operador: Carregando...</div>
-  </div>
-  
-  <div class="container">
-    <div class="card-title">
-      <i class="fas fa-door-closed"></i> Fechamento de Caixa
-    </div>
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <i class="fas fa-gas-pump"></i>
+      </div>
+      <h1>PDV Tanque Digital</h1>
+    </a>
     
-    <div id="loading" style="text-align:center;padding:40px">
-      <i class="fas fa-spinner fa-spin" style="font-size:30px;color:#1a73e8"></i>
+    <div class="user-info">
+      <div class="user-details">
+        <div class="user-name" id="userName">Carregando...</div>
+        <div class="user-role" id="userRole">-</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2 class="card-title">
+      <i class="fas fa-door-closed"></i> Fechamento de Caixa
+    </h2>
+    
+    <div id="loading" class="loading">
+      <i class="fas fa-spinner fa-spin"></i>
       <p style="margin-top:15px">Carregando dados do caixa...</p>
     </div>
     
@@ -107,16 +354,13 @@
   </div>
 
   <script>
-    // 🔐 CONFIGURAÇÃO SEGURA - SUBSTITUA PELAS SUAS CHAVES
     const SUPABASE_URL = 'https://qxgwpcpgkemxnjfyncfu.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Z3dwY3Bna2VteG5qZnluY2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzUyMzcsImV4cCI6MjA4NjE1MTIzN30.7a5RzenN6rHGyoaxewxs05rGEH9cXj7sxRtfxGVl0SI';
-    
-    const supabase = window.supabase.create({
-      supabaseUrl: SUPABASE_URL,
-      supabaseKey: SUPABASE_ANON_KEY
-    });
+    const supabase = window.supabase.create({ supabaseUrl: SUPABASE_URL, supabaseKey: SUPABASE_ANON_KEY });
 
-    if (!localStorage.getItem('userId')) window.location.href = 'index.html';
+    if (!localStorage.getItem('userId')) {
+      window.location.href = 'index.html';
+    }
 
     let openingBalance = 0;
     let totalCash = 0;
@@ -124,7 +368,9 @@
     let totalCard = 0;
 
     document.addEventListener('DOMContentLoaded', async () => {
-      document.getElementById('operatorName').textContent = `Operador: ${localStorage.getItem('username') || 'Desconhecido'}`;
+      document.getElementById('userName').textContent = localStorage.getItem('username');
+      document.getElementById('userRole').textContent = 
+        localStorage.getItem('role') === 'admin' ? 'Administrador' : 'Operador';
       
       // Verificar se tem caixa aberto
       const {  cashRegister } = await supabase
@@ -249,6 +495,5 @@
       }
     });
   </script>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>

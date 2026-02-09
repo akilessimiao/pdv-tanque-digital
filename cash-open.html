@@ -5,44 +5,271 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PDV Tanque Digital - Abertura de Caixa</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body{padding:20px;background:#f5f7fa}
-    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;padding-bottom:15px;border-bottom:2px solid #1a73e8}
-    .container{max-width:600px;margin:0 auto;background:#fff;border-radius:12px;padding:30px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
-    .card-title{font-size:24px;font-weight:700;margin-bottom:20px;color:#1a73e8;text-align:center}
-    .info-box{background:#e8f0fe;padding:15px;border-radius:8px;margin-bottom:20px;text-align:center}
-    .info-box strong{color:#1a73e8}
-    .form-group{margin-bottom:20px}
-    .form-group label{display:block;margin-bottom:8px;font-weight:600;color:#333}
-    .form-group input{width:100%;padding:14px;border:2px solid #ddd;border-radius:8px;font-size:18px;text-align:right}
-    .btn{width:100%;padding:16px;background:#1a73e8;color:#fff;border:none;border-radius:10px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px}
-    .btn:hover{background:#0d62d9}
-    .btn-danger{background:#dc3545}
-    .btn-danger:hover{background:#c82333}
-    .status{padding:15px;background:#fff3cd;border-radius:8px;margin-top:20px;text-align:center;font-weight:600;color:#856404}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #0d62d9;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --dark: #212529;
+      --light: #f8f9fa;
+      --gray: #6c757d;
+      --border: #e9ecef;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .header {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #1a73e8, #6f42c1);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--dark);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+    }
+
+    .logo h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+    }
+
+    .user-details {
+      text-align: right;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 16px;
+    }
+
+    .user-role {
+      color: var(--gray);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-title {
+      font-size: 24px;
+      color: var(--dark);
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .card-title i {
+      color: var(--primary);
+    }
+
+    .info-box {
+      background: #e8f0fe;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 25px;
+      border-left: 4px solid var(--primary);
+    }
+
+    .info-box strong {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 16px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 18px;
+      text-align: right;
+      transition: all 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 18px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+
+    .status {
+      padding: 15px;
+      background: #d4edda;
+      border-radius: 16px;
+      margin-top: 20px;
+      text-align: center;
+      font-weight: 600;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+
+    .status.danger {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="logo">
-      <i class="fas fa-gas-pump"></i>
-      <span>PDV Tanque Digital</span>
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <i class="fas fa-gas-pump"></i>
+      </div>
+      <h1>PDV Tanque Digital</h1>
+    </a>
+    
+    <div class="user-info">
+      <div class="user-details">
+        <div class="user-name" id="userName">Carregando...</div>
+        <div class="user-role" id="userRole">-</div>
+      </div>
     </div>
-    <div class="operator" id="operatorName">Operador: Carregando...</div>
   </div>
-  
+
   <div class="container">
-    <div class="card-title">
+    <h2 class="card-title">
       <i class="fas fa-door-open"></i> Abertura de Caixa
-    </div>
+    </h2>
     
     <div class="info-box">
       <p><strong>Atenção:</strong> A abertura de caixa é obrigatória para realizar vendas.</p>
       <p>O valor informado será o saldo inicial disponível para troco.</p>
     </div>
     
-    <div id="cashStatus"></div>
+    <div id="cashStatus" class="status">
+      <i class="fas fa-exclamation-triangle"></i> Nenhum caixa aberto
+    </div>
     
     <form id="openForm">
       <div class="form-group">
@@ -66,22 +293,21 @@
   </div>
 
   <script>
-    // 🔐 CONFIGURAÇÃO SEGURA - SUBSTITUA PELAS SUAS CHAVES
     const SUPABASE_URL = 'https://qxgwpcpgkemxnjfyncfu.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Z3dwY3Bna2VteG5qZnluY2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzUyMzcsImV4cCI6MjA4NjE1MTIzN30.7a5RzenN6rHGyoaxewxs05rGEH9cXj7sxRtfxGVl0SI';
-    
-    const supabase = window.supabase.create({
-      supabaseUrl: SUPABASE_URL,
-      supabaseKey: SUPABASE_ANON_KEY
-    });
+    const supabase = window.supabase.create({ supabaseUrl: SUPABASE_URL, supabaseKey: SUPABASE_ANON_KEY });
 
-    if (!localStorage.getItem('userId')) window.location.href = 'index.html';
+    if (!localStorage.getItem('userId')) {
+      window.location.href = 'index.html';
+    }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      document.getElementById('operatorName').textContent = `Operador: ${localStorage.getItem('username') || 'Desconhecido'}`;
+      document.getElementById('userName').textContent = localStorage.getItem('username');
+      document.getElementById('userRole').textContent = 
+        localStorage.getItem('role') === 'admin' ? 'Administrador' : 'Operador';
       
       // Verificar se já tem caixa aberto
-      const { data: openCash } = await supabase
+      const {  openCash } = await supabase
         .from('cash_registers')
         .select('*')
         .eq('company_id', localStorage.getItem('companyId'))
@@ -90,10 +316,9 @@
       
       if (openCash) {
         document.getElementById('cashStatus').innerHTML = `
-          <div class="status" style="background:#d4edda;color:#155724;border:1px solid #c3e6cb">
-            <i class="fas fa-check-circle"></i> Caixa já está aberto desde ${new Date(openCash.opened_at).toLocaleTimeString('pt-BR')}
-          </div>
+          <i class="fas fa-check-circle"></i> Caixa já está aberto desde ${new Date(openCash.opened_at).toLocaleTimeString('pt-BR')}
         `;
+        document.getElementById('cashStatus').className = 'status';
         document.getElementById('openForm').style.display = 'none';
       }
     });
@@ -128,6 +353,5 @@
       }
     });
   </script>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>
