@@ -53,37 +53,7 @@
 
 ---
 
-## ⚡ INSTALAÇÃO RÁPIDA (10 MINUTOS)
-
-### Passo 1: Criar Projeto no Supabase
-```bash
-1. Acesse https://supabase.com → "New Project"
-2. Nome: pdv-tanque-digital
-3. Region: Brazil (São Paulo) ✅
-4. Aguarde ~2 minutos para criar
-```
-
-### Passo 2: Executar Script SQL
-1. No Supabase → **SQL Editor** → **New Query**
-2. Cole o conteúdo de [`SUPABASE_SETUP.sql`](SUPABASE_SETUP.sql)
-3. Clique em **RUN** ✅
-
-### Passo 3: Deploy no Vercel
-```bash
-# Opção 1: Upload Manual (recomendado)
-1. Baixe todos os arquivos deste repositório
-2. Acesse https://vercel.com → "Add New Project"
-3. Selecione a pasta do projeto
-4. Clique em "Deploy"
-
-# Opção 2: GitHub (para atualizações futuras)
-1. Faça fork deste repositório
-2. No Vercel → "Import Git Repository"
-3. Conecte seu GitHub
-4. Deploy automático!
-```
-
-### Passo 4: Primeiro Acesso
+### Primeiro Acesso
 1. Acesse seu link do Vercel (ex: `https://pdv-tanque-digital.vercel.app`)
 2. Clique em **"Ativar"**
 3. Digite o código: `TQD-DEMO-2024`
