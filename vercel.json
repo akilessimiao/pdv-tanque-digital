@@ -1,12 +1,9 @@
 {
   "version": 2,
-  "name": "pdv-tanque-digital",
   "builds": [
-    { "src": "*.html", "use": "@vercel/static" },
-    { "src": "css/*.css", "use": "@vercel/static" },
-    { "src": "js/*.js", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/index.html" }
+    {
+      "src": "**/*.html",
+      "use": "@vercel/static"
+    }
   ]
 }
