@@ -137,59 +137,131 @@
       }
     }
 
-    // Ativação
+        // Ativação - VERSÃO ATUALIZADA PARA NOVO BANCO
     async function activate() {
       const serial = document.getElementById('serialKey').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      
       if (serial !== 'TQD-DEMO-2024') {
         alert('Código inválido!\nUse exatamente: TQD-DEMO-2024');
         return;
       }
       
       try {
-        // Verificar se já existe empresa
-        const { data: company } = await supabase
+        console.log('🔑 Iniciando ativação...');
+        
+        // 1. Verificar se já existe empresa no NOVO banco
+        const { data: company, error: companyError } = await supabase
           .from('companies')
           .select('id')
           .eq('company_name', 'Minha Empresa')
           .single();
         
+        if (companyError && companyError.code !== 'PGRST116') {
+          // PGRST116 = "No rows found" - é esperado se não existir
+          console.error('Erro ao buscar empresa:', companyError);
+          throw companyError;
+        }
+        
         if (company) {
-          // Empresa já existe - só criar usuário admin
-          await supabase.from('users').insert({
-            company_id: company.id,
-            username: 'admin',
-            password_hash: 'admin123',
-            role: 'admin'
-          });
+          // Empresa já existe - verificar se usuário admin já existe
+          const { data: existingUser } = await supabase
+            .from('users')
+            .select('id')
+            .eq('company_id', company.id)
+            .eq('username', 'admin')
+            .single();
           
-          alert('✅ Sistema já ativado!\nUsuário: admin\nSenha: admin123');
+          if (!existingUser) {
+            // Criar usuário admin
+            await supabase.from('users').insert({
+              company_id: company.id,
+              username: 'admin',
+              password_hash: 'admin123',
+              role: 'admin'
+            });
+          }
+          
+          alert('✅ Sistema já ativado anteriormente!\n\nUsuário: admin\nSenha: admin123\n\nClique em "Login" para entrar.');
           showTab('login');
           return;
         }
         
-        // Criar empresa nova
-        const { data: newCompany } = await supabase
+        // 2. Criar NOVA empresa
+        console.log('🏢 Criando nova empresa...');
+        const { data: newCompany, error: insertError } = await supabase
           .from('companies')
-          .insert({ company_name: 'Minha Empresa' })
+          .insert({ 
+            company_name: 'Minha Empresa',
+            cnpj: '00.000.000/0000-00',
+            phone: '(84) 99999-9999',
+            email: 'contato@tanquedigital.com.br'
+          })
           .select()
           .single();
         
-        // Criar usuário admin
-        await supabase.from('users').insert({
+        if (insertError) {
+          console.error('Erro ao criar empresa:', insertError);
+          throw insertError;
+        }
+        
+        // 3. Criar usuário admin
+        console.log('👤 Criando usuário admin...');
+        const { error: userError } = await supabase.from('users').insert({
           company_id: newCompany.id,
           username: 'admin',
           password_hash: 'admin123',
-          role: 'admin'
+          full_name: 'Administrador Principal',
+          role: 'admin',
+          is_active: true
         });
         
-        alert('✅ Ativação concluída!\nUsuário: admin\nSenha: admin123');
+        if (userError) {
+          console.error('Erro ao criar usuário:', userError);
+          throw userError;
+        }
+        
+        // 4. Marcar chave como usada (se tabela activation_keys existir)
+        try {
+          const { error: keyError } = await supabase
+            .from('activation_keys')
+            .update({ is_used: true })
+            .eq('serial_key', 'TQD-DEMO-2024');
+          
+          if (keyError) {
+            console.warn('Aviso (pode ignorar):', keyError.message);
+          }
+        } catch (keyErr) {
+          console.warn('Tabela activation_keys não encontrada, continuando...');
+        }
+        
+        alert('✅ ATIVAÇÃO CONCLUÍDA COM SUCESSO!\n\n' +
+              'Usuário: admin\n' +
+              'Senha: admin123\n\n' +
+              'Clique em "Login" para acessar o sistema.');
+        
+        console.log('🎉 Ativação completa! Empresa ID:', newCompany.id);
         showTab('login');
+        
       } catch (err) {
-        console.error('Erro na ativação:', err);
-        alert('Erro na ativação. Verifique o console (F12).');
+        console.error('❌ Erro completo na ativação:', err);
+        
+        // Mensagens amigáveis para erros comuns
+        if (err.message.includes('Failed to fetch') || err.message.includes('CORS')) {
+          alert('❌ ERRO DE CONEXÃO!\n\n' +
+                '1. Verifique se configurou CORS no Supabase\n' +
+                '2. As credenciais estão corretas?\n' +
+                '3. Banco de dados existe?');
+        } else if (err.message.includes('relation') && err.message.includes('does not exist')) {
+          alert('❌ TABELAS NÃO ENCONTRADAS!\n\n' +
+                'Execute o script SQL no novo banco:\n' +
+                '1. Acesse Supabase → SQL Editor\n' +
+                '2. Cole o script completo\n' +
+                '3. Clique em RUN');
+        } else {
+          alert('❌ Erro na ativação. Verifique o console (F12) para detalhes.');
+        }
       }
     }
-
     // Tecla Enter
     document.getElementById('password').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') login();
